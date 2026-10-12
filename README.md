@@ -18,14 +18,20 @@ scripts/
 
 ## 쓰는 법
 
-```
-conda activate env_isaaclab          # Isaac Sim 5.1 + Isaac Lab 2.3.2
-pip install -e .
+Python 3.11 + Isaac Sim 5.1.0 + Isaac Lab 2.3.2 + torch 2.7.0 (cu128).
+3.12 는 Isaac Lab 3.0 이 필요한데 아직 정식 릴리스가 없다.
 
-python scripts/convert_urdf.py assets/robots/so101/urdf/so101_new_calib.urdf \
-    assets/robots/so101/usd so101.usd
-python scripts/preview.py SO101_CFG --headless
 ```
+uv sync                               # .venv, 처음엔 수 GB 받는다
+export OMNI_KIT_ACCEPT_EULA=YES
+
+uv run python scripts/convert_urdf.py assets/robots/so101/urdf/so101_new_calib.urdf \
+    assets/robots/so101/usd so101.usd
+uv run python scripts/preview.py SO101_CFG --headless
+```
+
+다른 프로젝트(labs)는 이 저장소를 의존성으로 넣는다. `dependencies` 가 비어
+있어서 Isaac Lab 버전은 labs 쪽 것을 쓴다.
 
 ```python
 from isaac_envs.robots import SO101_CFG
