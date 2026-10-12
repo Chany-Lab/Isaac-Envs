@@ -1,0 +1,4 @@
+unitreerobotics/unitree_ros, robots/g1_description, BSD-3-Clause (LICENSE in this folder).
+Commit 5994d4faef0a9cadd3287f8de0199a67eeb2a259 (2026-09-30).
+Files copied unchanged: g1_29dof_rev_1_0.urdf, motor_info.md, README.md,
+and the 35 meshes the URDF references under meshes/.

@@ -3,6 +3,8 @@
     conda activate env_isaaclab
     python scripts/convert_urdf.py assets/robots/so101/urdf/so101_new_calib.urdf \
         assets/robots/so101/usd so101.usd
+    python scripts/convert_urdf.py assets/robots/g1/urdf/g1_29dof_rev_1_0.urdf \
+        assets/robots/g1/usd g1_29dof.usd --floating-base --collider convex_hull
 
 The options are fixed here rather than picked in the importer UI, so a
 re-conversion gives the same USD. Drive gains written into the USD are only
@@ -32,6 +34,12 @@ parser.add_argument(
     help="keep links on fixed joints (e.g. a TCP frame) instead of merging them",
 )
 parser.add_argument("--floating-base", action="store_true")
+parser.add_argument(
+    "--collider",
+    choices=["convex_decomposition", "convex_hull"],
+    default="convex_decomposition",
+    help="convex_hull is coarser but much cheaper, e.g. for a humanoid in RL",
+)
 AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 args.headless = True
@@ -51,7 +59,7 @@ def convert() -> Path:
         fix_base=not args.floating_base,
         merge_fixed_joints=not args.keep_fixed_joints,
         self_collision=False,
-        collider_type="convex_decomposition",
+        collider_type=args.collider,
         joint_drive=UrdfConverterCfg.JointDriveCfg(
             drive_type="force",
             target_type="position",
