@@ -1,0 +1,67 @@
+#usda 1.0
+(
+    defaultPrim = "table"
+    doc = """The shared table: Isaac Sim's heavy-duty packing table (the one Isaac Lab's
+humanoid pick-and-place tasks use), steel frame and laminate top.
+
+The model is in centimetres with its length along x; here it is scaled to metres
+and turned 90 deg about z, so its 0.762 m depth runs along x and its 2.44 m length
+along y. Origin on the floor under the middle of the top; top at 0.994 m.
+
+Colliders: a box for the top and the frame mesh as a static triangle mesh, so the
+space under the top stays open for legs and knees. The bolts do not collide."""
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "table" (
+    prepend apiSchemas = ["PhysicsMassAPI", "MaterialBindingAPI"]
+)
+{
+    # Static here (no rigid body), so the mass only counts if a task makes it
+    # dynamic. About a heavy-duty 96 x 30 in steel packing table.
+    float physics:mass = 90
+    rel material:binding:physics = </table/physics_material> (
+        bindMaterialAs = "weakerThanDescendants"
+    )
+
+    def Material "physics_material" (
+        prepend apiSchemas = ["PhysicsMaterialAPI"]
+    )
+    {
+        float physics:staticFriction = 0.5
+        float physics:dynamicFriction = 0.4
+        float physics:restitution = 0
+    }
+
+    def Xform "model" (
+        prepend references = @./SM_HeavyDutyPackingTable_C02_01/SM_HeavyDutyPackingTable_C02_01.usd@
+    )
+    {
+        float xformOp:rotateZ = 90
+        float3 xformOp:scale = (0.01, 0.01, 0.01)
+        uniform token[] xformOpOrder = ["xformOp:rotateZ", "xformOp:scale"]
+
+        over "Geometry"
+        {
+            over "M_HeavyDutyPackingTable_C01_Body" (
+                prepend apiSchemas = ["PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+            )
+            {
+                uniform token physics:approximation = "none"
+            }
+        }
+    }
+
+    def Cube "top_collider" (
+        prepend apiSchemas = ["PhysicsCollisionAPI"]
+    )
+    {
+        double size = 1
+        uniform token purpose = "guide"
+        double3 xformOp:translate = (0, 0, 0.9711)
+        float3 xformOp:scale = (0.762, 2.44, 0.046)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+    }
+}

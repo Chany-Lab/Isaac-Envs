@@ -1,4 +1,4 @@
-"""Pen into drawer: a ballpoint pen and a drawer cabinet on the shared steel
+"""Pen into drawer: a ballpoint pen and a drawer cabinet on the shared packing
 table, with a robot at the table's -x edge.
 
 The scene does not belong to one robot. The env origin is on the floor under
@@ -66,5 +66,5 @@ class PenIntoDrawerSceneCfg(InteractiveSceneCfg):
     )
 
 
-PEN_INTO_DRAWER_SCENE_CFG = PenIntoDrawerSceneCfg(num_envs=1, env_spacing=2.5)
+PEN_INTO_DRAWER_SCENE_CFG = PenIntoDrawerSceneCfg(num_envs=1, env_spacing=3.5)
 """One env; labs set num_envs themselves with `.replace(num_envs=...)`."""

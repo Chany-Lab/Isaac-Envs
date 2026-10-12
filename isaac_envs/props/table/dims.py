@@ -1,12 +1,8 @@
-"""Table sizes in metres, shared by scripts/build_props.py and the cfg.
+"""Table sizes in metres, measured from the packing table USD (not built).
 
-A steel workbench at standard height, big enough that an arm can be mounted
-on it or a humanoid can stand at its edge.
-Change a value here, then rebuild with `uv run python scripts/build_props.py`.
+Depth along x, length along y; see assets/props/table/table.usda.
 """
 
-TABLE_SIZE = (1.20, 0.80)  # x, y
-TABLE_HEIGHT = 0.75
-TABLE_TOP = 0.04
-TABLE_LEG = 0.05  # square tube
-TABLE_APRON = (0.08, 0.03)  # height, thickness of the frame under the top
+TABLE_SIZE = (0.762, 2.44)  # top, x (depth) by y (length)
+TABLE_HEIGHT = 0.994  # top surface above the floor
+TABLE_MASS = 90.0
