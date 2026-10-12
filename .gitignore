@@ -1,0 +1,11 @@
+__pycache__/
+*.egg-info/
+build/
+logs/
+outputs/
+# Isaac Sim writes these next to a USD it opened.
+*.usd.bak
+.thumbs/
+# UrdfConverter cache: absolute paths, and the options live in convert_urdf.py.
+assets/**/usd/config.yaml
+assets/**/usd/.asset_hash
