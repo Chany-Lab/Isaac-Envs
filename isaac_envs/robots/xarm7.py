@@ -3,7 +3,10 @@
 The USD is Isaac Sim 5.1's xArm7 asset with its gripper variant set to None,
 taken from the Mimic repo (see assets/robots/xarm7/SOURCE.txt). It pins its
 base to the world with its own `root_joint`, so the cfg does not fix it.
-Gains and torque limits are left to the USD drives for now.
+Gains follow ManiSkill's xArm7 agent (stiffness 1e3, damping 1e2,
+haosulab/ManiSkill, Apache-2.0); torque limits are UFACTORY's (50 / 30 / 20
+N·m on joints 1-2 / 3-5 / 6-7), not ManiSkill's 500.
+scripts/write_drive_gains.py writes the same values into the USD.
 """
 
 from __future__ import annotations
@@ -24,8 +27,10 @@ FLANGE_LINK = "link7"
 XARM7_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path=str(XARM7_USD),
+        # The xArm controller compensates gravity, and ManiSkill's gains assume
+        # it does; like Isaac Lab's Franka cfg, the arm ignores gravity instead.
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
-            disable_gravity=False,
+            disable_gravity=True,
             max_depenetration_velocity=5.0,
         ),
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
@@ -48,13 +53,17 @@ XARM7_CFG = ArticulationCfg(
         joint_vel={".*": 0.0},
     ),
     actuators={
-        # None keeps the USD's gains (stiffness about 2100-13000 N·m/rad on
-        # joints 1-5) and max force (50 / 30 / 20 N·m on 1-2 / 3-5 / 6-7).
         "arm": ImplicitActuatorCfg(
             joint_names_expr=ARM_JOINTS,
-            stiffness=None,
-            damping=None,
+            stiffness=1000.0,
+            damping=100.0,
+            effort_limit_sim={
+                "joint[1-2]": 50.0,
+                "joint[3-5]": 30.0,
+                "joint[6-7]": 20.0,
+            },
+            velocity_limit_sim=3.14,  # 180 deg/s
         ),
     },
 )
-"""xArm7 on a fixed base, USD drive gains."""
+"""xArm7 on a fixed base, ManiSkill gains, UFACTORY torque limits."""

@@ -10,6 +10,10 @@ composing the two USDs.
 Six joints are driven: thumb swing and bend, and the first joint of each
 finger. The other finger joints follow them through PhysX mimic joints and
 have no drive, so no actuator covers them.
+
+Gains follow the hand actuators of Isaac Lab's G1_INSPIRE_FTP_CFG (stiffness
+10, damping 0.2); force limits stay the sample's 1.4-1.9 N·m.
+scripts/write_drive_gains.py writes the same values into the USD.
 """
 
 from __future__ import annotations
@@ -51,12 +55,12 @@ INSPIRE_RH56BFX_CFG = ArticulationCfg(
         joint_pos={".*": 0.0}, joint_vel={".*": 0.0}
     ),
     actuators={
-        # None keeps the USD's gains and force limits (1.4-1.9 N·m).
+        # effort_limit_sim=None keeps the USD's 1.4-1.9 N·m.
         "fingers": ImplicitActuatorCfg(
             joint_names_expr=HAND_JOINTS,
-            stiffness=None,
-            damping=None,
+            stiffness=10.0,
+            damping=0.2,
         ),
     },
 )
-"""Right Inspire hand, open, root fixed where it is placed, USD drive gains."""
+"""Right Inspire hand, open, root fixed where it is placed, Isaac Lab gains."""

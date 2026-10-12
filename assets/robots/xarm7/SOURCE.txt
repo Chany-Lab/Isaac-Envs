@@ -2,6 +2,7 @@ Copied from the Mimic repo (~/ws/Mimic), data/sims/robots/ufactory_xarm7/,
 commit 1cd410246f7be54c52f79a77e7e8525fa06f55be.
 There it is the UFACTORY xArm7 asset shipped with Isaac Sim 5.1, with the
 gripper variant set to None; NVIDIA Isaac Sim asset terms apply.
-Files copied unchanged: ufactory_xarm7.usd and configuration/*.usd.
+Files copied unchanged: configuration/*.usd. ufactory_xarm7.usd also carries
+drive gain overrides written by scripts/write_drive_gains.py.
 The None gripper variant still names xarm_gripper/xarm_gripper.usd, which is
 not copied and never loaded.

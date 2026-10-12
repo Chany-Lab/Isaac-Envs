@@ -7,8 +7,8 @@
         assets/robots/g1/usd g1_29dof.usd --floating-base --collider convex_hull
 
 The options are fixed here rather than picked in the importer UI, so a
-re-conversion gives the same USD. Drive gains written into the USD are only
-defaults: the ArticulationCfg in `isaac_envs/robots/` overrides them.
+re-conversion gives the same USD. Drive gains written here are placeholders:
+run scripts/write_drive_gains.py afterwards to copy the cfg's gains in.
 
 The check at the end catches the import traps hit before with Isaac Sim 5.1:
 a stage whose metersPerUnit is not 1.0 (the robot flails on Play), and an

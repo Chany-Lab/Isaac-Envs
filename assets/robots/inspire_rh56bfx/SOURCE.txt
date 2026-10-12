@@ -10,3 +10,4 @@ the hand back to the origin wherever Isaac Lab places it).
 The wrapper also caps right_thumb_2_joint at 17.9 deg (30 in the sample):
 right_thumb_3_joint mimics it at 1.1425x and stops at 20.5 deg, so beyond
 17.9 the joint limit and the mimic constraint fight and the thumb spins.
+It also carries the drive gains written by scripts/write_drive_gains.py.
