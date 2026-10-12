@@ -2,8 +2,9 @@
 
     uv run python scripts/build_props.py
 
-Writes assets/props/{table,pan,pen,drawer}/*.usd from the sizes in
-isaac_envs/props/{table,pan,pen,drawer}/dims.py.
+Writes assets/props/{pan,pen,drawer}/*.usd from the sizes in
+isaac_envs/props/{pan,pen,drawer}/dims.py. The table is not built: it is
+Isaac Sim's packing table (assets/props/table).
 """
 
 from __future__ import annotations
@@ -22,7 +23,6 @@ from pxr import Gf, Sdf, Usd, UsdGeom, UsdPhysics, UsdShade  # noqa: E402
 from isaac_envs.props.drawer.dims import *  # noqa: E402,F403
 from isaac_envs.props.pan.dims import *  # noqa: E402,F403
 from isaac_envs.props.pen.dims import *  # noqa: E402,F403
-from isaac_envs.props.table.dims import *  # noqa: E402,F403
 
 PROPS = Path(__file__).resolve().parents[1] / "assets" / "props"
 
@@ -52,7 +52,12 @@ def bind_physics(prim, material) -> None:
     )
 
 
-def box(stage, path: str, size, center, color) -> None:
+def set_mass(prim, kg: float) -> None:
+    """Mass of one collider; its rigid body's mass is the sum of these."""
+    UsdPhysics.MassAPI.Apply(prim).CreateMassAttr(kg)
+
+
+def box(stage, path: str, size, center, color, mass: float | None = None) -> None:
     """A collider box: a unit cube scaled to `size`, centred at `center`."""
     cube = UsdGeom.Cube.Define(stage, path)
     cube.CreateSizeAttr(1.0)
@@ -60,9 +65,13 @@ def box(stage, path: str, size, center, color) -> None:
     cube.AddScaleOp().Set(Gf.Vec3f(*size))
     cube.CreateDisplayColorAttr([Gf.Vec3f(*color)])
     UsdPhysics.CollisionAPI.Apply(cube.GetPrim())
+    if mass is not None:
+        set_mass(cube.GetPrim(), mass)
 
 
-def hex_prism(stage, path: str, length: float, width: float, center, color) -> None:
+def hex_prism(
+    stage, path: str, length: float, width: float, center, color, mass: float
+) -> None:
     """A hexagonal collider along x, flats at top and bottom: three boxes
     turned 0, 60 and 120 degrees about x. `width` is across the flats."""
     for i in range(3):
@@ -73,64 +82,19 @@ def hex_prism(stage, path: str, length: float, width: float, center, color) -> N
         cube.AddScaleOp().Set(Gf.Vec3f(length, width / math.sqrt(3), width))
         cube.CreateDisplayColorAttr([Gf.Vec3f(*color)])
         UsdPhysics.CollisionAPI.Apply(cube.GetPrim())
+        set_mass(cube.GetPrim(), mass / 3)
 
 
-def rigid_body(stage, path: str, mass: float) -> Usd.Prim:
+def rigid_body(stage, path: str) -> Usd.Prim:
+    """A rigid body whose mass comes from the masses of its colliders."""
     prim = UsdGeom.Xform.Define(stage, path).GetPrim()
     UsdPhysics.RigidBodyAPI.Apply(prim)
-    UsdPhysics.MassAPI.Apply(prim).CreateMassAttr(mass)
     return prim
 
 
-def build_table() -> Path:
-    """Steel workbench, origin on the floor under the middle of the top.
-
-    Legs sit in the corners and an apron frame runs under the top's edges;
-    there is no shelf, so legs and knees fit under it.
-    """
-    path = PROPS / "table" / "table.usd"
-    stage, root = new_stage(path, "table")
-    top_grey = (0.62, 0.64, 0.66)
-    frame_grey = (0.30, 0.31, 0.33)
-    sx, sy = TABLE_SIZE
-    box(
-        stage,
-        "/table/top",
-        (sx, sy, TABLE_TOP),
-        (0, 0, TABLE_HEIGHT - TABLE_TOP / 2),
-        top_grey,
-    )
-    leg_h = TABLE_HEIGHT - TABLE_TOP
-    lx, ly = sx / 2 - TABLE_LEG / 2, sy / 2 - TABLE_LEG / 2
-    for i, (x, y) in enumerate([(1, 1), (1, -1), (-1, 1), (-1, -1)]):
-        box(
-            stage,
-            f"/table/leg_{i}",
-            (TABLE_LEG, TABLE_LEG, leg_h),
-            (x * lx, y * ly, leg_h / 2),
-            frame_grey,
-        )
-    ah, at = TABLE_APRON
-    az = leg_h - ah / 2
-    inner_x, inner_y = sx - 2 * TABLE_LEG, sy - 2 * TABLE_LEG
-    for side in (1, -1):
-        box(
-            stage,
-            f"/table/apron_x_{'pos' if side > 0 else 'neg'}",
-            (inner_x, at, ah),
-            (0, side * (ly + TABLE_LEG / 2 - at / 2), az),
-            frame_grey,
-        )
-        box(
-            stage,
-            f"/table/apron_y_{'pos' if side > 0 else 'neg'}",
-            (at, inner_y, ah),
-            (side * (lx + TABLE_LEG / 2 - at / 2), 0, az),
-            frame_grey,
-        )
-    bind_physics(root, physics_material(stage, "table", static=0.5, dynamic=0.4))
-    stage.Save()
-    return path
+def wood_box(stage, path: str, size, center, color) -> None:
+    """A box of MDF: its mass follows from its volume."""
+    box(stage, path, size, center, color, mass=MDF_DENSITY * math.prod(size))
 
 
 def build_pan() -> Path:
@@ -138,7 +102,6 @@ def build_pan() -> Path:
     path = PROPS / "pan" / "pan.usd"
     stage, root = new_stage(path, "pan")
     UsdPhysics.RigidBodyAPI.Apply(root)
-    UsdPhysics.MassAPI.Apply(root).CreateMassAttr(PAN_MASS)
     steel = (0.20, 0.20, 0.22)
     t = PAN_THICKNESS
 
@@ -149,6 +112,7 @@ def build_pan() -> Path:
     bottom.AddTranslateOp().Set(Gf.Vec3d(0, 0, t / 2))
     bottom.CreateDisplayColorAttr([Gf.Vec3f(*steel)])
     UsdPhysics.CollisionAPI.Apply(bottom.GetPrim())
+    set_mass(bottom.GetPrim(), PAN_BOTTOM_MASS)
 
     # The wall is a ring of boxes: a concave mesh would need decomposition.
     seg = 2 * math.pi * PAN_RADIUS / PAN_WALL_SEGMENTS * 1.05
@@ -164,6 +128,7 @@ def build_pan() -> Path:
         cube.AddScaleOp().Set(Gf.Vec3f(t, seg, PAN_WALL_HEIGHT))
         cube.CreateDisplayColorAttr([Gf.Vec3f(*steel)])
         UsdPhysics.CollisionAPI.Apply(cube.GetPrim())
+        set_mass(cube.GetPrim(), PAN_WALL_MASS / PAN_WALL_SEGMENTS)
 
     hl, hw, hh = PAN_HANDLE
     box(
@@ -172,6 +137,7 @@ def build_pan() -> Path:
         (hl, hw, hh),
         (PAN_RADIUS + hl / 2, 0, PAN_WALL_HEIGHT - hh / 2),
         (0.08, 0.08, 0.08),
+        mass=PAN_HANDLE_MASS,
     )
     bind_physics(root, physics_material(stage, "pan"))
     stage.Save()
@@ -184,7 +150,6 @@ def build_pen() -> Path:
     path = PROPS / "pen" / "pen.usd"
     stage, root = new_stage(path, "pen")
     UsdPhysics.RigidBodyAPI.Apply(root)
-    UsdPhysics.MassAPI.Apply(root).CreateMassAttr(PEN_MASS)
     # The cap is the widest part, so the pen rests on it.
     z = PEN_CAP_WIDTH / 2
     back = -PEN_LENGTH / 2
@@ -199,6 +164,7 @@ def build_pen() -> Path:
         PEN_WIDTH,
         (back + barrel / 2, 0, z),
         (0.90, 0.90, 0.88),
+        PEN_BARREL_MASS,
     )
     hex_prism(
         stage,
@@ -207,6 +173,7 @@ def build_pen() -> Path:
         PEN_CAP_WIDTH,
         (back + PEN_CAP_LENGTH / 2, 0, z),
         blue,
+        PEN_CAP_MASS,
     )
     cl, cw, ch = PEN_CLIP
     box(
@@ -215,6 +182,7 @@ def build_pen() -> Path:
         (cl, cw, ch),
         (back + cl / 2 + 0.005, 0, PEN_CAP_WIDTH + ch / 2),
         blue,
+        mass=PEN_CLIP_MASS,
     )
     tip = UsdGeom.Cylinder.Define(stage, "/pen/tip")
     tip.CreateRadiusAttr(tip_r)
@@ -223,6 +191,7 @@ def build_pen() -> Path:
     tip.AddTranslateOp().Set(Gf.Vec3d(PEN_LENGTH / 2 - tip_len / 2, 0, z))
     tip.CreateDisplayColorAttr([Gf.Vec3f(0.6, 0.6, 0.6)])
     UsdPhysics.CollisionAPI.Apply(tip.GetPrim())
+    set_mass(tip.GetPrim(), PEN_TIP_MASS)
 
     bind_physics(root, physics_material(stage, "pen", static=0.6, dynamic=0.5))
     stage.Save()
@@ -240,7 +209,7 @@ def build_drawer() -> Path:
     w = CABINET_WALL
     white = (0.85, 0.85, 0.82)
 
-    rigid_body(stage, "/drawer/cabinet", CABINET_MASS)
+    rigid_body(stage, "/drawer/cabinet")
     # Pin the cabinet to the world and root the articulation on that joint,
     # as the URDF importer does for robots; Isaac Lab's fix_root_link needs
     # a rigid body on the top prim instead.
@@ -255,7 +224,7 @@ def build_drawer() -> Path:
         "back": ((w, cy - 2 * w, cz - 2 * w), (-cx / 2 + w / 2, 0, cz / 2)),
     }
     for name, (size, center) in panels.items():
-        box(stage, f"/drawer/cabinet/{name}", size, center, white)
+        wood_box(stage, f"/drawer/cabinet/{name}", size, center, white)
 
     # Drawer box, built around its own origin at the centre of its floor.
     c = DRAWER_CLEARANCE
@@ -263,7 +232,7 @@ def build_drawer() -> Path:
     dy = cy - 2 * w - 2 * c
     dz = cz - 2 * w - 2 * c
     t = DRAWER_WALL
-    rigid_body(stage, "/drawer/tray", DRAWER_MASS)
+    rigid_body(stage, "/drawer/tray")
     wood = (0.60, 0.45, 0.30)
     tray = {
         "floor": ((dx, dy, t), (0, 0, t / 2)),
@@ -273,7 +242,7 @@ def build_drawer() -> Path:
         "right": ((dx - 2 * t, t, dz * 0.8), (0, -dy / 2 + t / 2, dz * 0.4)),
     }
     for name, (size, center) in tray.items():
-        box(stage, f"/drawer/tray/{name}", size, center, wood)
+        wood_box(stage, f"/drawer/tray/{name}", size, center, wood)
     hx, hy, hz = DRAWER_HANDLE
     box(
         stage,
@@ -281,6 +250,7 @@ def build_drawer() -> Path:
         (hx, hy, hz),
         (dx / 2 + hx / 2, 0, dz * 0.6),
         (0.1, 0.1, 0.1),
+        mass=DRAWER_HANDLE_MASS,
     )
 
     # Closed: the tray front sits flush with the cabinet front.
@@ -303,7 +273,7 @@ def build_drawer() -> Path:
 
 
 if __name__ == "__main__":
-    for build in (build_table, build_pan, build_pen, build_drawer):
+    for build in (build_pan, build_pen, build_drawer):
         print(build(), flush=True)
     # SimulationApp.close() can hang after a headless run.
     os._exit(0)
