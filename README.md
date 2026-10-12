@@ -12,11 +12,12 @@ isaac_envs/          cfg (uv sync 로 .venv 에 설치)
   robots/inspire_rh56bfx.py  INSPIRE_RH56BFX_CFG, Inspire 오른손 단독
   props/<소품>/       소품마다 폴더 하나: cfg.py 에 cfg, dims.py 에 치수
                      (dims.py 는 빌더와 cfg 가 같이 쓴다)
-  props/table/       TABLE_CFG, 모든 씬이 같이 쓰는 철제 작업대, 정적
-  props/pan/         PAN_CFG, 강체 0.15 kg, 손잡이 +x
-  props/pen/         PEN_CFG, 볼펜 강체 12 g, 육각 몸통(안 구름), 촉 +x
+  props/table/       TABLE_CFG, 모든 씬이 같이 쓰는 Isaac Sim 패킹 테이블, 정적
+  props/pan/         PAN_CFG, 강체 0.15 kg (부품별 질량), 손잡이 +x
+  props/pen/         PEN_CFG, 볼펜 강체 12 g (부품별 질량), 육각 몸통, 촉 +x
   props/drawer/      DRAWER_CFG, 서랍 하나짜리 장. 관절 `slide`
-                     0 닫힘 ~ 0.12 m 열림, 수동 감쇠, 앞면 +x
+                     0 닫힘 ~ 0.12 m 열림, 수동 감쇠, 앞면 +x. MDF 밀도로
+                     판마다 질량 (장 0.85 kg, 서랍 0.45 kg)
   scenes/<씬>/       씬마다 폴더 하나, cfg.py 에 씬 cfg. 이름은 로봇이 아니라
                      하는 일로 짓는다 (로봇은 지금 SO-101 고정)
   scenes/pen_into_drawer/  PenIntoDrawerSceneCfg / PEN_INTO_DRAWER_SCENE_CFG
@@ -28,11 +29,13 @@ assets/              실제 파일
   robots/xarm7/usd   Mimic 에서 가져온 Isaac Sim 5.1 xArm7 USD (SOURCE.txt)
   robots/inspire_rh56bfx/usd  Mimic 에서 가져온 Isaac Sim 6.0 Inspire 손 USD
                      + Isaac Lab 용 래퍼 *_isaaclab.usda (SOURCE.txt)
-  props/{table,pan,pen,drawer}/*.usd  build_props.py 로 만든 USD
+  props/table        Isaac Sim 패킹 테이블 원본 + 래퍼 table.usda (SOURCE.txt)
+  props/{pan,pen,drawer}/*.usd  build_props.py 로 만든 USD
 scripts/
   convert_urdf.py    URDF -> USD, 변환 뒤 단위·관절·바디 검사
   build_props.py     props/*/dims.py 치수로 소품 USD 생성
   preview.py         cfg 나 씬을 올려 초기 자세로 둔다 (명령 없음)
+  write_drive_gains.py  로봇 cfg 의 게인을 USD 관절 드라이브에 쓴다
 ```
 
 ## 쓰는 법
@@ -53,6 +56,7 @@ uv run python scripts/convert_urdf.py assets/robots/g1/urdf/g1_29dof_rev_1_0.urd
     assets/robots/g1/usd g1_29dof.usd --floating-base --collider convex_hull
 
 uv run python scripts/build_props.py                    # props/*/dims.py 고친 뒤 소품 USD 재생성
+uv run python scripts/write_drive_gains.py              # 로봇 cfg 게인 고친 뒤, 또는 URDF 재변환 뒤
 uv run python scripts/preview.py --scene PEN_INTO_DRAWER_SCENE_CFG   # 씬 보기
 ```
 
@@ -78,6 +82,20 @@ robot = SO101_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 - 2026-10-12 물리 검증(관절별 추종 시험): 둘 다 안정. 자세 유지 오차 최대
   1.38° / 0.45°.
 
+## 로봇 게인
+
+게인의 기준은 `isaac_envs/robots/` 의 cfg 다. `write_drive_gains.py` 가 같은
+값(강성·감쇠·토크·속도 한계·armature)을 각 USD 의 루트 레이어에 덮어써서, USD
+만 열어도 (Isaac Sim, Mimic) 같은 게인이 된다. cfg 게인을 바꾸거나 URDF 를
+다시 변환하면 이 스크립트를 다시 돌린다.
+
+| 로봇 | 게인 출처 |
+|---|---|
+| SO-101 | 공식 STS3215 식별값 |
+| G1 | Unitree unitree_rl_lab `UNITREE_G1_29DOF_CFG` |
+| xArm7 | ManiSkill xArm7 (강성 1000, 감쇠 100), 토크 한계는 UFACTORY 사양 |
+| Inspire 손 | Isaac Lab `G1_INSPIRE_FTP_CFG` 손 (강성 10, 감쇠 0.2) |
+
 ## G1
 
 - unitree_ros `g1_29dof_rev_1_0.urdf` (손 없음, 29 관절, 허리 3 축).
@@ -89,10 +107,12 @@ robot = SO101_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
 ## xArm7 / Inspire 손
 
-Mimic (`~/ws/Mimic/data/sims`) 의 USD 를 그대로 가져왔다. 게인은 USD 값.
+Mimic (`~/ws/Mimic/data/sims`) 의 USD 를 가져왔다. 게인은 위 표.
 
 - xArm7: 베이스를 자기 `root_joint` 로 월드에 고정한다. 초기 자세는 Mimic 과
   같은 joint2 -47.5°, joint7 9.6°. 토크 한계 50 / 30 / 20 N·m (1-2 / 3-5 / 6-7).
+  실제 컨트롤러처럼 중력을 보상한 상태로 쓰려고 팔의 중력을 끈다 (Isaac Lab
+  Franka cfg 와 같은 방식). 자세 유지·10° 스텝 오차 0.00°.
 - Inspire 오른손: 구동 관절 6 개 (엄지 2, 네 손가락 1 번째 마디). 나머지는
   PhysX mimic 관절로 따라간다. 원본을 감싼 `inspire_rh56bfx_isaaclab.usda` 가
   원본의 PhysicsScene 과 월드 FixedJoint 를 끄고, 엄지 2 번 관절 한계를
@@ -101,22 +121,28 @@ Mimic (`~/ws/Mimic/data/sims`) 의 USD 를 그대로 가져왔다. 게인은 USD
 
 ## 공용 테이블
 
-모든 씬이 같은 철제 작업대를 쓴다. 팔은 윗면에 올리고, 휴머노이드는 가장자리에
-서는 걸 생각한 크기다.
+모든 씬이 Isaac Sim 의 헤비듀티 패킹 테이블을 쓴다. Isaac Lab 의 G1·GR1
+휴머노이드 pick-and-place 작업이 쓰는 테이블에서 상자·크레이트만 뺀 것이다.
+철제 프레임에 라미네이트 상판.
 
-- 1.20 x 0.80 m, 윗면 높이 0.75 m, 상판 4 cm.
-- 원점은 상판 가운데 아래 바닥.
-- 다리 5 cm 각관 네 개와 상판 아래 틀만 있고 선반은 없다 (다리·무릎이 들어간다).
+- 상판 0.762 (x, 깊이) x 2.44 m (y, 길이), 윗면 높이 0.994 m.
+- 원점은 상판 가운데 아래 바닥. 원본은 cm 단위·길이 방향 x 라서 래퍼
+  `table.usda` 가 m 로 줄이고 90° 돌린다.
+- 충돌: 상판은 박스, 프레임은 메시 그대로 (정적 삼각형 메시). 테이블 밑이 비어
+  있어 다리·무릎이 들어간다. 볼트는 충돌 없음.
+- 질량 90 kg (같은 크기 철제 패킹 테이블 기준 추정). 정적이라 작업에서
+  동적으로 바꿀 때만 쓰인다.
 
 ## pen_into_drawer 씬
 
 - env 원점 = 테이블 원점. 로봇은 -x 가장자리에서 +x 를 본다.
-- 작업점 `WORK_POS` = (-0.45, 0, 0.75): -x 가장자리에서 0.15 m 안쪽 윗면.
+- 작업점 `WORK_POS` = (-0.231, 0, 0.994): -x 가장자리에서 0.15 m 안쪽 윗면.
   소품은 여기서부터 놓는다. SO-101 은 이 점에 베이스를 올린다.
 - 볼펜: 작업점에서 (+0.20, -0.14), 촉은 -y 쪽. 몸통을 가로질러 잡는다.
 - 서랍장: 작업점에서 (+0.30, +0.17), 앞면이 로봇을 본다. 서랍은 로봇 쪽으로 열린다.
 - SO-101 수평 도달 거리 약 0.45 m (실측).
 - 로봇은 지금 SO-101 로 고정. 나중에 `robot` 필드만 바꿔 다른 로봇을 쓴다.
+- 테이블이 2.44 m 라 `env_spacing` 은 3.5 m.
 
 labs 는 씬 cfg 를 가져와 작업 항목만 더한다. env 수는
 `.replace(num_envs=...)` 로 정한다.
