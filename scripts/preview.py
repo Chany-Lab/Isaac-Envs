@@ -2,8 +2,8 @@
 
     uv run python scripts/preview.py SO101_CFG
     uv run python scripts/preview.py SO101_CFG SO101_HIGH_PD_CFG   # side by side
-    uv run python scripts/preview.py --scene SO101_TABLETOP_SCENE_CFG
-    uv run python scripts/preview.py --scene SO101_TABLETOP_SCENE_CFG --headless
+    uv run python scripts/preview.py --scene PEN_INTO_DRAWER_SCENE_CFG
+    uv run python scripts/preview.py --scene PEN_INTO_DRAWER_SCENE_CFG --headless
 
 Nothing is commanded: robots only hold their init pose.
 """
@@ -52,7 +52,11 @@ def main() -> None:
     sim = sim_utils.SimulationContext(sim_utils.SimulationCfg(dt=DT))
     scene = InteractiveScene(getattr(scenes, args.scene)) if args.scene else None
     articulations = scene.articulations if scene else robots_scene()
-    sim.set_camera_view([0.9, 0.9, 0.9], [0.2, 0.0, 0.4])
+    if scene:
+        # Scenes centre the table on the env origin; look at its work side.
+        sim.set_camera_view([0.4, 1.4, 1.6], [-0.3, 0.0, 0.75])
+    else:
+        sim.set_camera_view([0.9, 0.9, 0.9], [0.2, 0.0, 0.4])
     sim.reset()
 
     for name, art in articulations.items():

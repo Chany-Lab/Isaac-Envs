@@ -1,4 +1,5 @@
-"""Table: static colliders, top at `TABLE_HEIGHT` above its origin."""
+"""Steel workbench: static colliders, origin on the floor under the middle,
+top at `TABLE_HEIGHT`."""
 
 from __future__ import annotations
 
@@ -6,7 +7,7 @@ import isaaclab.sim as sim_utils
 from isaaclab.assets import AssetBaseCfg
 
 from isaac_envs import ASSETS_ROOT
-from isaac_envs.props.dims import TABLE_HEIGHT, TABLE_SIZE
+from isaac_envs.props.table.dims import TABLE_HEIGHT, TABLE_SIZE
 
 TABLE_USD = ASSETS_ROOT / "props" / "table" / "table.usd"
 

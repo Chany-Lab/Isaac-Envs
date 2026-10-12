@@ -2,8 +2,8 @@
 
     uv run python scripts/build_props.py
 
-Writes assets/props/{table,pan,drawer}/*.usd from the sizes in
-isaac_envs/props/dims.py.
+Writes assets/props/{table,pan,pen,drawer}/*.usd from the sizes in
+isaac_envs/props/{table,pan,pen,drawer}/dims.py.
 """
 
 from __future__ import annotations
@@ -19,7 +19,10 @@ app = AppLauncher(headless=True).app
 
 from pxr import Gf, Sdf, Usd, UsdGeom, UsdPhysics, UsdShade  # noqa: E402
 
-from isaac_envs.props.dims import *  # noqa: E402,F403
+from isaac_envs.props.drawer.dims import *  # noqa: E402,F403
+from isaac_envs.props.pan.dims import *  # noqa: E402,F403
+from isaac_envs.props.pen.dims import *  # noqa: E402,F403
+from isaac_envs.props.table.dims import *  # noqa: E402,F403
 
 PROPS = Path(__file__).resolve().parents[1] / "assets" / "props"
 
@@ -59,6 +62,19 @@ def box(stage, path: str, size, center, color) -> None:
     UsdPhysics.CollisionAPI.Apply(cube.GetPrim())
 
 
+def hex_prism(stage, path: str, length: float, width: float, center, color) -> None:
+    """A hexagonal collider along x, flats at top and bottom: three boxes
+    turned 0, 60 and 120 degrees about x. `width` is across the flats."""
+    for i in range(3):
+        cube = UsdGeom.Cube.Define(stage, f"{path}_{i}")
+        cube.CreateSizeAttr(1.0)
+        cube.AddTranslateOp().Set(Gf.Vec3d(*center))
+        cube.AddRotateXOp().Set(60.0 * i)
+        cube.AddScaleOp().Set(Gf.Vec3f(length, width / math.sqrt(3), width))
+        cube.CreateDisplayColorAttr([Gf.Vec3f(*color)])
+        UsdPhysics.CollisionAPI.Apply(cube.GetPrim())
+
+
 def rigid_body(stage, path: str, mass: float) -> Usd.Prim:
     prim = UsdGeom.Xform.Define(stage, path).GetPrim()
     UsdPhysics.RigidBodyAPI.Apply(prim)
@@ -67,22 +83,52 @@ def rigid_body(stage, path: str, mass: float) -> Usd.Prim:
 
 
 def build_table() -> Path:
+    """Steel workbench, origin on the floor under the middle of the top.
+
+    Legs sit in the corners and an apron frame runs under the top's edges;
+    there is no shelf, so legs and knees fit under it.
+    """
     path = PROPS / "table" / "table.usd"
     stage, root = new_stage(path, "table")
-    wood = (0.55, 0.40, 0.25)
+    top_grey = (0.62, 0.64, 0.66)
+    frame_grey = (0.30, 0.31, 0.33)
     sx, sy = TABLE_SIZE
     box(
         stage,
         "/table/top",
         (sx, sy, TABLE_TOP),
         (0, 0, TABLE_HEIGHT - TABLE_TOP / 2),
-        wood,
+        top_grey,
     )
     leg_h = TABLE_HEIGHT - TABLE_TOP
+    lx, ly = sx / 2 - TABLE_LEG / 2, sy / 2 - TABLE_LEG / 2
     for i, (x, y) in enumerate([(1, 1), (1, -1), (-1, 1), (-1, -1)]):
-        center = (x * (sx / 2 - TABLE_LEG), y * (sy / 2 - TABLE_LEG), leg_h / 2)
-        box(stage, f"/table/leg_{i}", (TABLE_LEG, TABLE_LEG, leg_h), center, wood)
-    bind_physics(root, physics_material(stage, "table"))
+        box(
+            stage,
+            f"/table/leg_{i}",
+            (TABLE_LEG, TABLE_LEG, leg_h),
+            (x * lx, y * ly, leg_h / 2),
+            frame_grey,
+        )
+    ah, at = TABLE_APRON
+    az = leg_h - ah / 2
+    inner_x, inner_y = sx - 2 * TABLE_LEG, sy - 2 * TABLE_LEG
+    for side in (1, -1):
+        box(
+            stage,
+            f"/table/apron_x_{'pos' if side > 0 else 'neg'}",
+            (inner_x, at, ah),
+            (0, side * (ly + TABLE_LEG / 2 - at / 2), az),
+            frame_grey,
+        )
+        box(
+            stage,
+            f"/table/apron_y_{'pos' if side > 0 else 'neg'}",
+            (at, inner_y, ah),
+            (side * (lx + TABLE_LEG / 2 - at / 2), 0, az),
+            frame_grey,
+        )
+    bind_physics(root, physics_material(stage, "table", static=0.5, dynamic=0.4))
     stage.Save()
     return path
 
@@ -128,6 +174,57 @@ def build_pan() -> Path:
         (0.08, 0.08, 0.08),
     )
     bind_physics(root, physics_material(stage, "pan"))
+    stage.Save()
+    return path
+
+
+def build_pen() -> Path:
+    """Ballpoint pen lying on a flat of its cap, tip along +x, origin under
+    the middle of the pen."""
+    path = PROPS / "pen" / "pen.usd"
+    stage, root = new_stage(path, "pen")
+    UsdPhysics.RigidBodyAPI.Apply(root)
+    UsdPhysics.MassAPI.Apply(root).CreateMassAttr(PEN_MASS)
+    # The cap is the widest part, so the pen rests on it.
+    z = PEN_CAP_WIDTH / 2
+    back = -PEN_LENGTH / 2
+    tip_len, tip_r = PEN_TIP
+    barrel = PEN_LENGTH - tip_len
+    blue = (0.10, 0.20, 0.70)
+
+    hex_prism(
+        stage,
+        "/pen/barrel",
+        barrel,
+        PEN_WIDTH,
+        (back + barrel / 2, 0, z),
+        (0.90, 0.90, 0.88),
+    )
+    hex_prism(
+        stage,
+        "/pen/cap",
+        PEN_CAP_LENGTH,
+        PEN_CAP_WIDTH,
+        (back + PEN_CAP_LENGTH / 2, 0, z),
+        blue,
+    )
+    cl, cw, ch = PEN_CLIP
+    box(
+        stage,
+        "/pen/clip",
+        (cl, cw, ch),
+        (back + cl / 2 + 0.005, 0, PEN_CAP_WIDTH + ch / 2),
+        blue,
+    )
+    tip = UsdGeom.Cylinder.Define(stage, "/pen/tip")
+    tip.CreateRadiusAttr(tip_r)
+    tip.CreateHeightAttr(tip_len)
+    tip.CreateAxisAttr("X")
+    tip.AddTranslateOp().Set(Gf.Vec3d(PEN_LENGTH / 2 - tip_len / 2, 0, z))
+    tip.CreateDisplayColorAttr([Gf.Vec3f(0.6, 0.6, 0.6)])
+    UsdPhysics.CollisionAPI.Apply(tip.GetPrim())
+
+    bind_physics(root, physics_material(stage, "pen", static=0.6, dynamic=0.5))
     stage.Save()
     return path
 
@@ -206,7 +303,7 @@ def build_drawer() -> Path:
 
 
 if __name__ == "__main__":
-    for build in (build_table, build_pan, build_drawer):
+    for build in (build_table, build_pan, build_pen, build_drawer):
         print(build(), flush=True)
     # SimulationApp.close() can hang after a headless run.
     os._exit(0)

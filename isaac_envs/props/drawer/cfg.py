@@ -8,7 +8,7 @@ from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.assets import ArticulationCfg
 
 from isaac_envs import ASSETS_ROOT
-from isaac_envs.props.dims import DRAWER_TRAVEL
+from isaac_envs.props.drawer.dims import DRAWER_TRAVEL
 
 DRAWER_USD = ASSETS_ROOT / "props" / "drawer" / "drawer.usd"
 
