@@ -1,0 +1,12 @@
+Copied from the Mimic repo (~/ws/Mimic), data/sims/tools/inspire_rh56bfx/,
+commit 1cd410246f7be54c52f79a77e7e8525fa06f55be.
+There it is the Inspire RH56BFX rigging sample from Isaac Sim 6.0 (final
+checkpoint); NVIDIA Isaac Sim asset terms apply.
+Files copied unchanged: inspire_rh56bfx.usda, payloads/ and Materials/.
+Added here: inspire_rh56bfx_isaaclab.usda, a wrapper that references the
+sample and deactivates its PhysicsScene (it would step apart from Isaac Lab's)
+and its FixedJoint to the world (it sits outside the articulation and pulls
+the hand back to the origin wherever Isaac Lab places it).
+The wrapper also caps right_thumb_2_joint at 17.9 deg (30 in the sample):
+right_thumb_3_joint mimics it at 1.1425x and stops at 20.5 deg, so beyond
+17.9 the joint limit and the mimic constraint fight and the thumb spins.

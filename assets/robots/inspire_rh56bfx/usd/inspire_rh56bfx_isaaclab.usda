@@ -1,0 +1,37 @@
+#usda 1.0
+(
+    defaultPrim = "inspire_hand"
+    doc = """inspire_rh56bfx.usda for Isaac Lab: without its own PhysicsScene, which would step apart
+from Isaac Lab's, and without the FixedJoint that pins r_base_link to the world origin outside
+the articulation (it fights any other placement); the cfg fixes the root instead.
+right_thumb_2_joint stops at 17.9 deg instead of 30: right_thumb_3_joint mimics it at 1.1425x
+and stops at 20.5 deg, so past 17.9 the two constraints fight and the thumb spins."""
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "inspire_hand" (
+    prepend references = @./inspire_rh56bfx.usda@
+)
+{
+    over "Physics"
+    {
+        over "FixedJoint" (
+            active = false
+        )
+        {
+        }
+
+        over "right_thumb_2_joint"
+        {
+            float physics:upperLimit = 17.9
+        }
+    }
+
+    over "PhysicsScene" (
+        active = false
+    )
+    {
+    }
+}

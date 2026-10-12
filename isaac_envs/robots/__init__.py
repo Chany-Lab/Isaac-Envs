@@ -1,5 +1,14 @@
 """Robot articulation cfgs."""
 
+from isaac_envs.robots.g1 import G1_CFG
+from isaac_envs.robots.inspire_rh56bfx import INSPIRE_RH56BFX_CFG
 from isaac_envs.robots.so101 import SO101_CFG, SO101_HIGH_PD_CFG
+from isaac_envs.robots.xarm7 import XARM7_CFG
 
-__all__ = ["SO101_CFG", "SO101_HIGH_PD_CFG"]
+__all__ = [
+    "G1_CFG",
+    "INSPIRE_RH56BFX_CFG",
+    "SO101_CFG",
+    "SO101_HIGH_PD_CFG",
+    "XARM7_CFG",
+]
