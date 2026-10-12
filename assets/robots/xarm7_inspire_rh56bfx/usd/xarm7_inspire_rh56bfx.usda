@@ -1,0 +1,93 @@
+#usda 1.0
+(
+    defaultPrim = "xarm7_inspire_rh56bfx"
+    doc = """xArm7 with the right Inspire RH56BFX hand on its flange (link7).
+From Mimic's ufactory_xarm7_inspire_rh56bfx.usda (made by its scripts/compose-sim-robot.py),
+with the references pointed at this repo's xarm7 and inspire_rh56bfx_isaaclab.usda."""
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "xarm7_inspire_rh56bfx" (
+    prepend references = @../../xarm7/usd/ufactory_xarm7.usd@
+)
+{
+    over "joints"
+    {
+        over "joint1"
+        {
+            float state:angular:physics:position = 0
+        }
+
+        over "joint2"
+        {
+            float state:angular:physics:position = -47.5
+        }
+
+        over "joint3"
+        {
+            float state:angular:physics:position = 0
+        }
+
+        over "joint4"
+        {
+            float state:angular:physics:position = 0
+        }
+
+        over "joint5"
+        {
+            float state:angular:physics:position = 0
+        }
+
+        over "joint6"
+        {
+            float state:angular:physics:position = 0
+        }
+
+        over "joint7"
+        {
+            float state:angular:physics:position = 9.6
+        }
+    }
+
+    def Xform "tool" (
+        prepend references = @../../inspire_rh56bfx/usd/inspire_rh56bfx_isaaclab.usda@
+    )
+    {
+        quatf xformOp:orient = (-0.0000036358833, 1, 0, 0)
+        double3 xformOp:translate = (0.20600061118602753, 0.000002825486035362701, 0.1204998716711998)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient"]
+
+        over "Physics"
+        {
+            over "FixedJoint" (
+                active = false
+            )
+            {
+            }
+        }
+
+        over "r_base_link" (
+            delete apiSchemas = ["PhysicsArticulationRootAPI"]
+        )
+        {
+        }
+
+        over "PhysicsScene" (
+            active = false
+        )
+        {
+        }
+    }
+
+    def PhysicsFixedJoint "tool_joint"
+    {
+        rel physics:body0 = </xarm7_inspire_rh56bfx/link7>
+        rel physics:body1 = </xarm7_inspire_rh56bfx/tool/r_base_link>
+        point3f physics:localPos0 = (2.7755576e-17, 0, 0)
+        point3f physics:localPos1 = (0, 0, 0)
+        quatf physics:localRot0 = (1, 0, 0, 0)
+        quatf physics:localRot1 = (1, 0, 0, 0)
+    }
+}
+

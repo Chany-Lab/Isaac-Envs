@@ -33,7 +33,9 @@ from pxr import PhysxSchema, Usd, UsdPhysics  # noqa: E402
 
 import isaac_envs.robots as robots  # noqa: E402
 
-# One cfg per USD: SO101_HIGH_PD_CFG shares SO101_CFG's file.
+# One cfg per USD: SO101_HIGH_PD_CFG shares SO101_CFG's file, and the
+# xArm7 + Inspire USD references the xArm7 and Inspire files, so it inherits
+# what is written into those.
 ROBOTS = ["SO101_CFG", "G1_CFG", "XARM7_CFG", "INSPIRE_RH56BFX_CFG"]
 
 

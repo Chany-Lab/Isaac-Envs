@@ -10,6 +10,7 @@ isaac_envs/          cfg (uv sync 로 .venv 에 설치)
   robots/g1.py       G1_CFG, Unitree G1 29 자유도, 자유 베이스 (RL 용)
   robots/xarm7.py    XARM7_CFG, UFACTORY xArm7, 그리퍼 없음
   robots/inspire_rh56bfx.py  INSPIRE_RH56BFX_CFG, Inspire 오른손 단독
+  robots/xarm7_inspire_rh56bfx.py  XARM7_INSPIRE_RH56BFX_CFG, xArm7 + Inspire 손
   props/<소품>/       소품마다 폴더 하나: cfg.py 에 cfg, dims.py 에 치수
                      (dims.py 는 빌더와 cfg 가 같이 쓴다)
   props/table/       TABLE_CFG, 모든 씬이 같이 쓰는 Isaac Sim 패킹 테이블, 정적
@@ -29,6 +30,7 @@ assets/              실제 파일
   robots/xarm7/usd   Mimic 에서 가져온 Isaac Sim 5.1 xArm7 USD (SOURCE.txt)
   robots/inspire_rh56bfx/usd  Mimic 에서 가져온 Isaac Sim 6.0 Inspire 손 USD
                      + Isaac Lab 용 래퍼 *_isaaclab.usda (SOURCE.txt)
+  robots/xarm7_inspire_rh56bfx/usd  위 둘을 참조해 붙인 Mimic 합본 USDA
   props/table        Isaac Sim 패킹 테이블 원본 + 래퍼 table.usda (SOURCE.txt)
   props/{pan,pen,drawer}/*.usd  build_props.py 로 만든 USD
 scripts/
@@ -117,7 +119,10 @@ Mimic (`~/ws/Mimic/data/sims`) 의 USD 를 가져왔다. 게인은 위 표.
   PhysX mimic 관절로 따라간다. 원본을 감싼 `inspire_rh56bfx_isaaclab.usda` 가
   원본의 PhysicsScene 과 월드 FixedJoint 를 끄고, 엄지 2 번 관절 한계를
   30° 에서 17.9° 로 줄인다 (그 위로는 mimic 과 한계가 싸워 엄지가 돈다).
-- Mimic 에 있는 xArm7 + Inspire 합본은 아직 안 가져왔다.
+- xArm7 + Inspire 합본 (`XARM7_INSPIRE_RH56BFX_CFG`): Mimic 의 합본 USDA 를
+  가져와 참조만 이 저장소의 xArm7 과 손 래퍼로 바꿨다. 손 바닥(`r_base_link`)을
+  link7 에 FixedJoint 로 붙이고 손의 아티큘레이션 루트를 지운다. 게인·엄지
+  수정은 두 USD 에서 그대로 따라온다. 관절 19 개 (팔 7, 손 구동 6, mimic 6).
 
 ## 공용 테이블
 
