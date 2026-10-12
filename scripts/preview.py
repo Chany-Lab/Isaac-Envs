@@ -63,7 +63,7 @@ def main() -> None:
     articulations = scene.articulations if scene else robots_scene()
     if scene:
         # Scenes centre the table on the env origin; look at its work side.
-        sim.set_camera_view([0.4, 1.4, 1.6], [-0.3, 0.0, 0.75])
+        sim.set_camera_view([1.0, 1.6, 1.9], [-0.2, 0.0, 0.95])
     else:
         middle = (len(args.cfgs) - 1) * args.spacing / 2
         tall = any(a.cfg.init_state.pos[2] > 0.3 for a in articulations.values())
