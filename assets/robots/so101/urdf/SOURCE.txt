@@ -1,0 +1,4 @@
+TheRobotStudio/SO-ARM100, Simulation/SO101, Apache-2.0 (LICENSE in this folder).
+Commit a758567c3978dfeefe282ede0500085a48fe8f78 (2026-10-06).
+Files copied unchanged: so101_new_calib.urdf, joints_properties.xml, README.md,
+and the 13 meshes the URDF references under assets/.
