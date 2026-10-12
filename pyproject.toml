@@ -6,9 +6,39 @@ build-backend = "setuptools.build_meta"
 name = "isaac-envs"
 version = "0.1.0"
 description = "Isaac Lab assets: robots, scenes and props, with their cfgs. No tasks."
-requires-python = ">=3.11"
-# isaaclab comes from the env_isaaclab conda env, not from PyPI.
+# Isaac Sim 5.1 / Isaac Lab 2.3 are 3.11 only; 3.12 needs Isaac Lab 3.0,
+# which has no stable release yet.
+requires-python = ">=3.11,<3.12"
+# Empty on purpose: a lab that depends on this brings its own Isaac Lab.
 dependencies = []
+
+[dependency-groups]
+# This repo's own environment, for converting and previewing assets.
+sim = [
+    "isaaclab[isaacsim]==2.3.2.post1",
+    "torch==2.7.0",
+    "torchvision==0.22.0",
+]
+dev = ["black==26.5.1"]
+
+[tool.uv]
+default-groups = ["sim", "dev"]
+# NVIDIA and PyTorch indexes carry some of the same names as PyPI.
+index-strategy = "unsafe-best-match"
+
+[[tool.uv.index]]
+name = "nvidia"
+url = "https://pypi.nvidia.com"
+
+[[tool.uv.index]]
+# cu128 or newer: the GPU here is Blackwell (sm_120).
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
 
 [tool.setuptools.packages.find]
 include = ["isaac_envs*"]
