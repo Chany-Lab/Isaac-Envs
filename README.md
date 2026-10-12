@@ -48,6 +48,7 @@ uv run python scripts/convert_urdf.py assets/robots/so101/urdf/so101_new_calib.u
     assets/robots/so101/usd so101.usd
 uv run python scripts/preview.py SO101_CFG              # 뷰어
 uv run python scripts/preview.py SO101_CFG --headless   # 불러오기만 확인
+uv run python scripts/preview.py G1_CFG --fix-base     # 휴머노이드는 몸통을 고정해서 본다
 uv run python scripts/convert_urdf.py assets/robots/g1/urdf/g1_29dof_rev_1_0.urdf \
     assets/robots/g1/usd g1_29dof.usd --floating-base --collider convex_hull
 
