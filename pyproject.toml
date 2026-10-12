@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "isaac-envs"
+version = "0.1.0"
+description = "Isaac Lab assets: robots, scenes and props, with their cfgs. No tasks."
+requires-python = ">=3.11"
+# isaaclab comes from the env_isaaclab conda env, not from PyPI.
+dependencies = []
+
+[tool.setuptools.packages.find]
+include = ["isaac_envs*"]
+
+[tool.black]
+target-version = ["py311"]
