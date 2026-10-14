@@ -4,9 +4,9 @@ USD Storage
 
 <br>
 
-### Available Robots 
+### Available Robots
 
-| Img | Robot | Model Name | 
+| Img | Robot | Model Name |
 | :---: | :--- | :--- |
 | <img src="https://raw.githubusercontent.com/TheRobotStudio/SO-ARM100/a758567c3978dfeefe282ede0500085a48fe8f78/media/SO101_Follower.webp" width="120"> | SO-101 | `SO101_CFG`, `SO101_HIGH_PD_CFG` |
 | <img src="https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/Robots/Ufactory/xarm7/.thumbs/256x256/xarm7.usd.png" width="120"> | UFACTORY xArm7 | `XARM7_CFG` |
@@ -17,17 +17,18 @@ USD Storage
 ### Envs & Objects
 
 - [Envs.md](Envs.md): scenes
-- [Objects.md](Objects.md): props (table, pen, pan, drawer)
+- [Objects.md](Objects.md): props (table, desk, pen, pan, drawer, cube, tray)
 
 ### Interface (`sims/`)
 
-[Interface](https://github.com/Chany-Lab/Interface) finds robots by their LeRobot
-type. `sims/` gives it that view of this repo: `sims/robots/<type>/<type>.usda`
-and `sims/tools/<id>/<id>.usda` only reference the USDs under `assets/`, and the
-`robot.yaml` next to each holds its start pose and keyboard TCP link. Interface's
-sim server places props from `assets/props/<name>/` by name. `sims/envs/` holds
-the environment scripts Interface shares (`build(scene)`, e.g. `lift_cube.py`);
-they live here because their heights and yaws follow these assets.
+What [Interface](https://github.com/Chany-Lab/Interface) reads, by LeRobot type.
+
+| Path | Content |
+| :--- | :--- |
+| `sims/robots/<type>/` | USDA referencing a robot under `assets/`, and `robot.yaml` (start pose, TCP link) |
+| `sims/tools/<id>/` | Same for end effectors |
+| `sims/envs/` | Shared environment scripts (`build(scene)`, e.g. `lift_cube.py`) |
+| `assets/props/<name>/` | Props the sim server places by name |
 
 | Interface id | Robot |
 | :--- | :--- |
