@@ -28,7 +28,14 @@ from isaaclab.sensors import Camera, CameraCfg  # noqa: E402
 from PIL import Image  # noqa: E402
 
 from isaac_envs import REPO_ROOT  # noqa: E402
-from isaac_envs.props import DRAWER_CFG, PAN_CFG, PEN_CFG  # noqa: E402
+from isaac_envs.props import (  # noqa: E402
+    CUBE_CFG,
+    DESK_CFG,
+    DRAWER_CFG,
+    PAN_CFG,
+    PEN_CFG,
+    TRAY_CFG,
+)
 from isaac_envs.props.drawer import DRAWER_TRAVEL  # noqa: E402
 from isaac_envs.scenes import PEN_INTO_DRAWER_SCENE_CFG  # noqa: E402
 
@@ -39,6 +46,9 @@ OUT = REPO_ROOT / "media"
 PEN_POS = (0.0, -10.0, 0.0)
 PAN_POS = (2.0, -10.0, 0.0)
 DRAWER_POS = (4.0, -10.0, 0.0)
+CUBE_POS = (6.0, -10.0, 0.0)
+TRAY_POS = (8.0, -10.0, 0.0)
+DESK_POS = (11.0, -10.0, 0.0)
 
 
 def add(pos, offset):
@@ -50,6 +60,9 @@ SHOTS = {
     "pen": (add(PEN_POS, (0.10, 0.14, 0.12)), add(PEN_POS, (0.0, 0.0, 0.005))),
     "pan": (add(PAN_POS, (0.16, 0.22, 0.22)), add(PAN_POS, (0.03, 0.0, 0.01))),
     "drawer": (add(DRAWER_POS, (0.45, 0.35, 0.35)), add(DRAWER_POS, (0.05, 0.0, 0.06))),
+    "cube": (add(CUBE_POS, (0.09, 0.11, 0.10)), add(CUBE_POS, (0.0, 0.0, 0.02))),
+    "tray": (add(TRAY_POS, (0.18, 0.22, 0.22)), add(TRAY_POS, (0.0, 0.0, 0.01))),
+    "desk": (add(DESK_POS, (1.6, 1.9, 1.6)), add(DESK_POS, (0.0, 0.0, 0.4))),
     "pen_into_drawer": ([-0.75, -0.55, 1.55], [0.0, 0.0, 1.0]),
 }
 
@@ -75,6 +88,14 @@ def main() -> None:
             ),
         )
     )
+    cube = RigidObject(
+        CUBE_CFG.replace(
+            prim_path="/World/Cube", init_state=RigidObjectCfg.InitialStateCfg(pos=CUBE_POS)
+        )
+    )
+    # Static props: spawned as they are, nothing to update.
+    for name, cfg, pos in (("Tray", TRAY_CFG, TRAY_POS), ("Desk", DESK_CFG, DESK_POS)):
+        cfg.spawn.func(f"/World/{name}", cfg.spawn, translation=pos)
     camera = Camera(
         CameraCfg(
             prim_path="/World/Camera",
@@ -100,7 +121,7 @@ def main() -> None:
                 art.write_data_to_sim()
             sim.step()
             scene.update(DT)
-            for asset in (pen, pan, drawer):
+            for asset in (pen, pan, drawer, cube):
                 asset.update(DT)
         camera.update(DT)
         rgb = camera.data.output["rgb"][0, ..., :3].cpu().numpy()
