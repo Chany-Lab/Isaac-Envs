@@ -25,7 +25,9 @@ USD Storage
 type. `sims/` gives it that view of this repo: `sims/robots/<type>/<type>.usda`
 and `sims/tools/<id>/<id>.usda` only reference the USDs under `assets/`, and the
 `robot.yaml` next to each holds its start pose and keyboard TCP link. Interface's
-sim server places props from `assets/props/<name>/` by name.
+sim server places props from `assets/props/<name>/` by name. `sims/envs/` holds
+the environment scripts Interface shares (`build(scene)`, e.g. `lift_cube.py`);
+they live here because their heights and yaws follow these assets.
 
 | Interface id | Robot |
 | :--- | :--- |
