@@ -6,42 +6,122 @@ build-backend = "setuptools.build_meta"
 name = "isaac-envs"
 version = "0.1.0"
 description = "Isaac Lab assets: robots, scenes and props, with their cfgs. No tasks."
-# Isaac Sim 5.1 / Isaac Lab 2.3 are 3.11 only; 3.12 needs Isaac Lab 3.0,
-# which has no stable release yet.
-requires-python = ">=3.11,<3.12"
+# Isaac Sim 6.x and Isaac Lab 3.0 are 3.12 only.
+requires-python = ">=3.12,<3.13"
 # Empty on purpose: a lab that depends on this brings its own Isaac Lab.
 dependencies = []
 
 [dependency-groups]
-# This repo's own environment, for converting and previewing assets.
+# This repo's own environment, for converting and previewing assets: Isaac Sim
+# 6.2 with Isaac Lab 3.0 from source (release/3.0.0). The isaaclab packages
+# carry no third-party requirements of their own (Isaac Lab keeps them in its
+# root pyproject), so the runtime set below mirrors that list, minus RL,
+# tasks and teleop.
 sim = [
-    "isaaclab[isaacsim]==2.3.2.post1",
-    "torch==2.7.0",
-    "torchvision==0.22.0",
+    "isaacsim[all,extscache]==6.2.0.0",
+    "isaaclab",
+    "isaaclab-physx",
+    "isaaclab-newton",
+    "isaaclab-visualizers",
+    "torch==2.11.0",
+    "torchvision==0.26.0",
+    "numpy>=2",
+    "warp-lang==1.17.0",
+    "newton[sim]==1.6.1",
+    "newton-usd-schemas>=0.5.0",
+    "usd-exchange==3.0.1",
+    "onnx>=1.18.0",
+    "prettytable>=3.3.0",
+    "psutil",
+    "protobuf>=4.25.8,!=5.26.0",
+    "hidapi>=0.14.0",
+    "gymnasium>=1.2.0",
+    "trimesh>=4.6.8",
+    "pyglet>=2.1.6,<3",
+    "einops",
+    "matplotlib>=3.10.3",
+    "pillow>=12.3.0",
+    "botocore",
+    "starlette>=1.3.1",
+    "omniverseclient==2.74.0",
+    "filelock",
+    "lazy_loader>=0.4",
+    "Jinja2",
+    "hf-xet>=1.4.1,<2.0.0",
+    "numba>=0.63.1",
+    "hydra-core",
+    "h5py>=3.15.0",
+    "packaging",
+    "rich",
+    "tqdm>=4.67.1",
+    "requests>=2.25.0",
+    "urllib3>=2.8.0",
+    "scipy>=1.11.0",
+    "coacd>=1.0.7",
+    "fast-simplification>=0.1.11",
+    "alphashape>=1.3.1",
+    "meshio>=5.3.5",
+    "pycollada>=0.9",
+    "resolve-robotics-uri-py>=0.4.0",
+    "open3d>=0.19.0",
+    "PyOpenGL-accelerate>=3.1.0",
+    "imgui-bundle>=1.92.5",
+    "typing-extensions>=4.15.0",
 ]
 dev = ["black==26.5.1"]
 
 [tool.uv]
 default-groups = ["sim", "dev"]
+# Linux x86_64 only: the one platform this repo's sim environment is run on.
+environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
 # NVIDIA and PyTorch indexes carry some of the same names as PyPI.
 index-strategy = "unsafe-best-match"
+prerelease = "allow"
+# Isaac Lab's own overrides (release/3.0.0 pyproject.toml): Isaac Sim 6.2 pins
+# older torch, Newton, USD and packaging versions than Isaac Lab 3.0 runs on.
+override-dependencies = [
+    "numpy>=2",
+    "mujoco~=3.12.0",
+    "mujoco-warp~=3.12.0",
+    "newton[sim]==1.6.1",
+    "newton-usd-schemas>=0.5.0",
+    "usd-exchange==3.0.1",
+    "usd-optimize~=1.3.1",
+    "torch==2.11.0",
+    "torchvision==0.26.0",
+    "fsspec>=2026.6.0",
+    "packaging>=20,<27",
+    "urllib3>=2.8.0",
+]
 
 [[tool.uv.index]]
 name = "nvidia"
 url = "https://pypi.nvidia.com"
 
 [[tool.uv.index]]
-# cu128 or newer: the GPU here is Blackwell (sm_120).
-name = "pytorch-cu128"
-url = "https://download.pytorch.org/whl/cu128"
+name = "pypi-public"
+url = "https://pypi.org/simple"
+explicit = true
+
+[[tool.uv.index]]
+# CUDA 13 wheels: torch 2.11 for Blackwell (sm_120), driver 580 or newer.
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
 explicit = true
 
 [tool.uv.sources]
-torch = { index = "pytorch-cu128" }
-torchvision = { index = "pytorch-cu128" }
+torch = { index = "pytorch-cu130" }
+torchvision = { index = "pytorch-cu130" }
+omniverseclient = { index = "pypi-public" }
+# Isaac Lab 3.0 has no wheel for Isaac Sim 6.2 yet (3.0.0rc1 targets 6.1):
+# take the packages from the release branch at a fixed commit.
+isaaclab = { git = "https://github.com/isaac-sim/IsaacLab.git", rev = "d061bf35a58273ef0cc8aceae76392166f9b7d15", subdirectory = "source/isaaclab" }
+isaaclab-physx = { git = "https://github.com/isaac-sim/IsaacLab.git", rev = "d061bf35a58273ef0cc8aceae76392166f9b7d15", subdirectory = "source/isaaclab_physx" }
+isaaclab-newton = { git = "https://github.com/isaac-sim/IsaacLab.git", rev = "d061bf35a58273ef0cc8aceae76392166f9b7d15", subdirectory = "source/isaaclab_newton" }
+isaaclab-visualizers = { git = "https://github.com/isaac-sim/IsaacLab.git", rev = "d061bf35a58273ef0cc8aceae76392166f9b7d15", subdirectory = "source/isaaclab_visualizers" }
 
 [tool.setuptools.packages.find]
 include = ["isaac_envs*"]
 
 [tool.black]
-target-version = ["py311"]
+target-version = ["py312"]
