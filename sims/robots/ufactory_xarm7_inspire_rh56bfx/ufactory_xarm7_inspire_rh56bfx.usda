@@ -1,0 +1,13 @@
+#usda 1.0
+(
+    defaultPrim = "ufactory_xarm7_inspire_rh56bfx"
+    doc = """xArm7 with the right Inspire RH56BFX hand for Interface: references this repo's composed robot."""
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "ufactory_xarm7_inspire_rh56bfx" (
+    prepend references = @../../../assets/robots/manipulation/xarm7_inspire_rh56bfx/usd/xarm7_inspire_rh56bfx.usda@
+)
+{
+}

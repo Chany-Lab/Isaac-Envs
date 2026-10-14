@@ -19,11 +19,27 @@ USD Storage
 - [Envs.md](Envs.md): scenes
 - [Objects.md](Objects.md): props (table, pen, pan, drawer)
 
+### Interface (`sims/`)
+
+[Interface](https://github.com/Chany-Lab/Interface) finds robots by their LeRobot
+type. `sims/` gives it that view of this repo: `sims/robots/<type>/<type>.usda`
+and `sims/tools/<id>/<id>.usda` only reference the USDs under `assets/`, and the
+`robot.yaml` next to each holds its start pose and keyboard TCP link. Interface's
+sim server places props from `assets/props/<name>/` by name.
+
+| Interface id | Robot |
+| :--- | :--- |
+| `so101_follower` | SO-101 |
+| `ufactory_xarm7` | xArm7 |
+| `ufactory_xarm7_inspire_rh56bfx` | xArm7 + Inspire RH56BFX |
+| `inspire_rh56bfx` (tool) | Inspire RH56BFX |
+
 ## Setup Guide
 
 Python 3.11, Isaac Sim 5.1.0, Isaac Lab 2.3.2, torch 2.7.0 (cu128), managed with uv.
 
 ```bash
+git lfs install && git lfs pull   # the USDs are in Git LFS
 uv sync
 export OMNI_KIT_ACCEPT_EULA=YES
 

@@ -1,0 +1,13 @@
+#usda 1.0
+(
+    defaultPrim = "inspire_rh56bfx"
+    doc = """Inspire RH56BFX right hand for Interface: references this repo's Isaac Lab wrapper."""
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "inspire_rh56bfx" (
+    prepend references = @../../../assets/robots/hands/inspire_rh56bfx/usd/inspire_rh56bfx_isaaclab.usda@
+)
+{
+}

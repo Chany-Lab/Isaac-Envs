@@ -1,0 +1,19 @@
+# Robot config for Interface, read by its sim server when the robot is placed.
+# initial_pose: joint -> degrees (USD joint angles) the robot starts and holds in at Play;
+# joints under percent take 0-100 over their limits (a LeRobot gripper).
+# The leader rest pose is per station and lives in Interface's config/, not here.
+# Folded: shoulder lifted back, elbow and wrist bent.
+initial_pose:
+  shoulder_pan: 0
+  shoulder_lift: -100
+  elbow_flex: 90
+  wrist_flex: 50
+  wrist_roll: 0
+  gripper: 0
+percent:
+- gripper
+# Keyboard TCP jog: the gripper link; 5 arm joints, so not every direction is reachable
+tcp:
+  link: gripper_link
+  offset: [0, 0, 0]
+  joints: [shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll]

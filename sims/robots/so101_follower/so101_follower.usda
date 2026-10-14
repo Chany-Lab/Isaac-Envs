@@ -1,0 +1,13 @@
+#usda 1.0
+(
+    defaultPrim = "so101_follower"
+    doc = """SO-101 follower for Interface (LeRobot type so101_follower): references this repo's SO-101."""
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "so101_follower" (
+    prepend references = @../../../assets/robots/manipulation/so101/usd/so101.usd@
+)
+{
+}

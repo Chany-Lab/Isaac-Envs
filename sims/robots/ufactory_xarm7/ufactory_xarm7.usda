@@ -1,0 +1,13 @@
+#usda 1.0
+(
+    defaultPrim = "ufactory_xarm7"
+    doc = """UFACTORY xArm7 for Interface: references this repo's xArm7 (no gripper)."""
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "ufactory_xarm7" (
+    prepend references = @../../../assets/robots/manipulation/xarm7/usd/ufactory_xarm7.usd@
+)
+{
+}
