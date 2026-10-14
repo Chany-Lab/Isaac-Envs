@@ -1,14 +1,18 @@
 """Convert a robot URDF to USD with Isaac Lab, then check the result.
 
-    conda activate env_isaaclab
-    python scripts/convert_urdf.py assets/robots/manipulation/so101/urdf/so101_new_calib.urdf \
-        assets/robots/manipulation/so101/usd so101.usd
-    python scripts/convert_urdf.py assets/robots/humanoid/g1/urdf/g1_29dof_rev_1_0.urdf \
-        assets/robots/humanoid/g1/usd g1_29dof.usd --floating-base --collider convex_hull
+    uv run python scripts/convert_urdf.py assets/robots/manipulation/so101/urdf/so101_new_calib.urdf \
+        assets/robots/manipulation/so101/usd
+    uv run python scripts/convert_urdf.py assets/robots/humanoid/g1/urdf/g1_29dof_rev_1_0.urdf \
+        assets/robots/humanoid/g1/usd --floating-base --collider convex_hull
 
 The options are fixed here rather than picked in the importer UI, so a
 re-conversion gives the same USD. Drive gains written here are placeholders:
 run scripts/write_drive_gains.py afterwards to copy the cfg's gains in.
+
+Isaac Sim 6's URDF importer (3.0) names the output after the URDF and writes
+`<out_dir>/<urdf name>/<urdf name>.usda`, always instanceable. The USDs in
+assets/ were converted with Isaac Sim 5.1 (`<out_dir>/<name>.usd`); after a
+re-conversion, point the robot cfg at the new file.
 
 The check at the end catches the import traps hit before with Isaac Sim 5.1:
 a stage whose metersPerUnit is not 1.0 (the robot flails on Play), and an
@@ -26,7 +30,6 @@ from isaaclab.app import AppLauncher
 parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
 parser.add_argument("urdf", type=Path)
 parser.add_argument("out_dir", type=Path)
-parser.add_argument("usd_name")
 parser.add_argument(
     "--keep-fixed-joints",
     action=argparse.BooleanOptionalAction,
@@ -48,18 +51,21 @@ app = AppLauncher(args).app
 from isaaclab.sim.converters import UrdfConverter, UrdfConverterCfg  # noqa: E402
 from pxr import Usd, UsdGeom, UsdPhysics  # noqa: E402
 
+COLLIDERS = {
+    "convex_decomposition": "Convex Decomposition",
+    "convex_hull": "Convex Hull",
+}
+
 
 def convert() -> Path:
     cfg = UrdfConverterCfg(
         asset_path=str(args.urdf.resolve()),
         usd_dir=str(args.out_dir.resolve()),
-        usd_file_name=args.usd_name,
         force_usd_conversion=True,
-        make_instanceable=True,
         fix_base=not args.floating_base,
         merge_fixed_joints=not args.keep_fixed_joints,
         self_collision=False,
-        collider_type=args.collider,
+        collision_type=COLLIDERS[args.collider],
         joint_drive=UrdfConverterCfg.JointDriveCfg(
             drive_type="force",
             target_type="position",

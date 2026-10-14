@@ -74,8 +74,8 @@ def write(name: str) -> None:
             drive = UsdPhysics.DriveAPI.Apply(prim, "angular" if angular else "linear")
             kp = per_joint(actuator.stiffness, joint)
             kd = per_joint(actuator.damping, joint)
-            effort = per_joint(actuator.effort_limit_sim, joint)
-            vel = per_joint(actuator.velocity_limit_sim, joint)
+            effort = per_joint(actuator.joint_effort_limit, joint)
+            vel = per_joint(actuator.joint_velocity_limit, joint)
             arm = per_joint(actuator.armature, joint)
             if kp is not None:
                 drive.CreateStiffnessAttr().Set(kp * unit)

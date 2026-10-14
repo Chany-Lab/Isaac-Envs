@@ -8,7 +8,9 @@
 
 Nothing is commanded: robots only hold their init pose. A floating-base robot
 such as the G1 has no policy here and falls over; --fix-base hangs it at its
-init height instead.
+init height instead. Without --headless the Kit viewport opens (Isaac Lab 3.0
+only opens one for `--viz kit`, which is the default here); --headless loads,
+reports bodies and joints, and exits.
 """
 
 from __future__ import annotations
@@ -16,7 +18,7 @@ from __future__ import annotations
 import argparse
 import os
 
-from isaaclab.app import AppLauncher
+from isaaclab.app import add_launcher_args, launch_simulation
 
 parser = argparse.ArgumentParser()
 parser.add_argument("cfgs", nargs="*", help="names in isaac_envs.robots")
@@ -25,23 +27,30 @@ parser.add_argument("--spacing", type=float, default=0.5, help="metres between r
 parser.add_argument(
     "--fix-base", action="store_true", help="pin each robot's root where it spawns"
 )
-AppLauncher.add_app_launcher_args(parser)
+parser.add_argument(
+    "--headless", action="store_true", help="no viewport: load, report and exit"
+)
+add_launcher_args(parser)
 args = parser.parse_args()
 if not args.cfgs and not args.scene:
     parser.error("give robot cfg names or --scene")
-app = AppLauncher(args).app
+if args.visualizer is None:
+    args.visualizer = [] if args.headless else ["kit"]
 
 import isaaclab.sim as sim_utils  # noqa: E402
-from isaaclab.assets import Articulation  # noqa: E402
-from isaaclab.scene import InteractiveScene  # noqa: E402
-
-import isaac_envs.robots as robots  # noqa: E402
-import isaac_envs.scenes as scenes  # noqa: E402
+from isaaclab_physx.physics import PhysxCfg  # noqa: E402
 
 DT = 1.0 / 120.0
+# PhysX: the drawer's world root joint and the Inspire hand's mimic joints are
+# PhysX schemas, and the cfgs' solver settings are PhysX ones.
+SIM_CFG = sim_utils.SimulationCfg(dt=DT, device=args.device, physics=PhysxCfg())
 
 
-def robots_scene() -> dict[str, Articulation]:
+def robots_scene() -> dict:
+    from isaaclab.assets import Articulation
+
+    import isaac_envs.robots as robots
+
     ground = sim_utils.GroundPlaneCfg()
     ground.func("/World/ground", ground)
     light = sim_utils.DomeLightCfg(intensity=2000.0)
@@ -52,13 +61,18 @@ def robots_scene() -> dict[str, Articulation]:
         # Keep the cfg's height: a humanoid's root is its pelvis, not its feet.
         cfg.init_state.pos = (i * args.spacing, 0.0, cfg.init_state.pos[2])
         if args.fix_base:
-            cfg.spawn.articulation_props.fix_root_link = True
+            cfg.spawn.fix_root_link = True
         loaded[name] = Articulation(cfg)
     return loaded
 
 
 def main() -> None:
-    sim = sim_utils.SimulationContext(sim_utils.SimulationCfg(dt=DT))
+    # Asset modules load USD (pxr); Kit must be up first.
+    from isaaclab.scene import InteractiveScene
+
+    import isaac_envs.scenes as scenes
+
+    sim = sim_utils.SimulationContext(SIM_CFG)
     scene = InteractiveScene(getattr(scenes, args.scene)) if args.scene else None
     articulations = scene.articulations if scene else robots_scene()
     if scene:
@@ -74,9 +88,8 @@ def main() -> None:
     sim.reset()
     # Start in the init pose rather than the USD's joint state.
     for art in articulations.values():
-        art.write_joint_state_to_sim(
-            art.data.default_joint_pos, art.data.default_joint_vel
-        )
+        art.write_joint_position_to_sim_index(position=art.data.default_joint_pos.torch)
+        art.write_joint_velocity_to_sim_index(velocity=art.data.default_joint_vel.torch)
 
     for name, art in articulations.items():
         print(f"{name}: {art.num_bodies} bodies, joints {art.joint_names}", flush=True)
@@ -86,9 +99,11 @@ def main() -> None:
     if args.headless:
         return
 
-    while app.is_running():
+    while sim.is_running():
         for art in articulations.values():
-            art.set_joint_position_target(art.data.default_joint_pos)
+            art.actuators.target_command.set_position_index(
+                value=art.data.default_joint_pos.torch
+            )
             art.write_data_to_sim()
         if scene:
             scene.write_data_to_sim()
@@ -100,8 +115,8 @@ def main() -> None:
                 art.update(DT)
 
 
-main()
-if args.headless:
-    # SimulationApp.close() can hang after a headless run.
-    os._exit(0)
-app.close()
+with launch_simulation(SIM_CFG, args):
+    main()
+    if args.headless:
+        # Closing Kit can hang after a headless run.
+        os._exit(0)
