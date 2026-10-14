@@ -8,7 +8,7 @@ Scene cfgs built from the robots and [objects](Objects.md) in this repo.
 
 | Img | Env | Model Name | Robot | Objects |
 | :---: | :--- | :--- | :--- | :--- |
-| - | Pen into drawer | `PEN_INTO_DRAWER_SCENE_CFG` | SO-101 | Table, Pen, Drawer |
+| <img src="media/pen_into_drawer.png" width="120"> | Pen into drawer | `PEN_INTO_DRAWER_SCENE_CFG` | SO-101 | Table, Pen, Drawer |
 
 ```python
 from isaac_envs.scenes import PEN_INTO_DRAWER_SCENE_CFG
