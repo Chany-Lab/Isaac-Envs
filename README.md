@@ -39,17 +39,25 @@ What [Interface](https://github.com/Chany-Lab/Interface) reads, by LeRobot type.
 
 ## Setup Guide
 
-Python 3.11, Isaac Sim 5.1.0, Isaac Lab 2.3.2, torch 2.7.0 (cu128), managed with uv.
+| Component | Version |
+| :--- | :--- |
+| Python | 3.12 |
+| Isaac Sim | 6.2.0 (`isaacsim[all,extscache]`) |
+| Isaac Lab | 3.0 (`release/3.0.0` @ `d061bf3`, from git) |
+| Physics | PhysX (Newton 1.6.1 installed too) |
+| torch | 2.11.0 (cu130), NVIDIA driver 580+ |
+
+Managed with uv. `setup.sh` checks git-lfs, uv and the driver, pulls the
+LFS assets and runs `uv sync`; run it again at any time.
 
 ```bash
-git lfs install && git lfs pull   # the USDs are in Git LFS
-uv sync
+./setup.sh            # --check: only verify, --no-sim: assets and dev tools only
 export OMNI_KIT_ACCEPT_EULA=YES
 
 uv run python scripts/preview.py SO101_CFG                          # view a robot
 uv run python scripts/preview.py --scene PEN_INTO_DRAWER_SCENE_CFG  # view a scene
 ```
 
-Other projects add this repo as a dependency and bring their own Isaac Lab.
-After changing prop dims or robot gains, rerun `scripts/build_props.py` or
-`scripts/write_drive_gains.py`.
+Other projects add this repo as a dependency and bring their own Isaac Lab
+(3.0; quaternions are `(x, y, z, w)`). After changing prop dims or robot
+gains, rerun `scripts/build_props.py` or `scripts/write_drive_gains.py`.
