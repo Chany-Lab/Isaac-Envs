@@ -1,7 +1,7 @@
 """Inspire RH56BFX dexterous hand, right, on its own.
 
 The USD is Isaac Sim 6.0's Inspire rigging sample, taken from the Mimic repo
-(see assets/robots/inspire_rh56bfx/SOURCE.txt), loaded through
+(see assets/robots/hands/inspire_rh56bfx/SOURCE.txt), loaded through
 `inspire_rh56bfx_isaaclab.usda`, which switches off the sample's own
 PhysicsScene and its world FixedJoint. The cfg fixes the root link instead, so
 the hand stands alone wherever it is placed; mounting it on an arm means
@@ -25,7 +25,12 @@ from isaaclab.assets import ArticulationCfg
 from isaac_envs import ASSETS_ROOT
 
 INSPIRE_RH56BFX_USD = (
-    ASSETS_ROOT / "robots" / "inspire_rh56bfx" / "usd" / "inspire_rh56bfx_isaaclab.usda"
+    ASSETS_ROOT
+    / "robots"
+    / "hands"
+    / "inspire_rh56bfx"
+    / "usd"
+    / "inspire_rh56bfx_isaaclab.usda"
 )
 
 HAND_JOINTS = [

@@ -51,7 +51,7 @@ def Xform "xarm7_inspire_rh56bfx" (
     }
 
     def Xform "tool" (
-        prepend references = @../../inspire_rh56bfx/usd/inspire_rh56bfx_isaaclab.usda@
+        prepend references = @../../../hands/inspire_rh56bfx/usd/inspire_rh56bfx_isaaclab.usda@
     )
     {
         quatf xformOp:orient = (-0.0000036358833, 1, 0, 0)

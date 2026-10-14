@@ -1,7 +1,7 @@
 """Unitree G1 humanoid, 29 DoF (rev 1.0), no hands, floating base.
 
 USD converted from unitree_ros `g1_29dof_rev_1_0.urdf` (see
-assets/robots/g1/urdf/SOURCE.txt). Actuator groups, limits, gains and the
+assets/robots/humanoid/g1/urdf/SOURCE.txt). Actuator groups, limits, gains and the
 init pose follow `UNITREE_G1_29DOF_CFG` in unitreerobotics/unitree_rl_lab
 (Apache-2.0, commit 4960b84), Unitree's own Isaac Lab locomotion setup.
 Limits match motor_info.md and the URDF.
@@ -15,7 +15,7 @@ from isaaclab.assets import ArticulationCfg
 
 from isaac_envs import ASSETS_ROOT
 
-G1_USD = ASSETS_ROOT / "robots" / "g1" / "usd" / "g1_29dof.usd"
+G1_USD = ASSETS_ROOT / "robots" / "humanoid" / "g1" / "usd" / "g1_29dof.usd"
 
 # Unitree SDK motor order, for mapping policy actions to the real robot.
 G1_SDK_JOINTS = [

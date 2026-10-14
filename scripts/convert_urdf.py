@@ -1,10 +1,10 @@
 """Convert a robot URDF to USD with Isaac Lab, then check the result.
 
     conda activate env_isaaclab
-    python scripts/convert_urdf.py assets/robots/so101/urdf/so101_new_calib.urdf \
-        assets/robots/so101/usd so101.usd
-    python scripts/convert_urdf.py assets/robots/g1/urdf/g1_29dof_rev_1_0.urdf \
-        assets/robots/g1/usd g1_29dof.usd --floating-base --collider convex_hull
+    python scripts/convert_urdf.py assets/robots/manipulation/so101/urdf/so101_new_calib.urdf \
+        assets/robots/manipulation/so101/usd so101.usd
+    python scripts/convert_urdf.py assets/robots/humanoid/g1/urdf/g1_29dof_rev_1_0.urdf \
+        assets/robots/humanoid/g1/usd g1_29dof.usd --floating-base --collider convex_hull
 
 The options are fixed here rather than picked in the importer UI, so a
 re-conversion gives the same USD. Drive gains written here are placeholders:

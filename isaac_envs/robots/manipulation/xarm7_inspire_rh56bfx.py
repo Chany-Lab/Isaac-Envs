@@ -1,6 +1,6 @@
 """xArm7 with the right Inspire RH56BFX hand fixed to its flange (link7).
 
-The USD (taken from Mimic, see assets/robots/xarm7_inspire_rh56bfx/SOURCE.txt)
+The USD (taken from Mimic, see assets/robots/manipulation/xarm7_inspire_rh56bfx/SOURCE.txt)
 references this repo's xArm7 and Inspire wrapper and joins them with a
 FixedJoint, so it gets the same thumb limit fix and drive gains. The arm keeps
 its own root_joint to the world. Actuators are the two robots' cfgs together.
@@ -12,12 +12,13 @@ import isaaclab.sim as sim_utils
 from isaaclab.assets import ArticulationCfg
 
 from isaac_envs import ASSETS_ROOT
-from isaac_envs.robots.inspire_rh56bfx import HAND_JOINTS, INSPIRE_RH56BFX_CFG
-from isaac_envs.robots.xarm7 import ARM_JOINTS, XARM7_CFG
+from isaac_envs.robots.hands.inspire_rh56bfx import HAND_JOINTS, INSPIRE_RH56BFX_CFG
+from isaac_envs.robots.manipulation.xarm7 import ARM_JOINTS, XARM7_CFG
 
 XARM7_INSPIRE_RH56BFX_USD = (
     ASSETS_ROOT
     / "robots"
+    / "manipulation"
     / "xarm7_inspire_rh56bfx"
     / "usd"
     / "xarm7_inspire_rh56bfx.usda"

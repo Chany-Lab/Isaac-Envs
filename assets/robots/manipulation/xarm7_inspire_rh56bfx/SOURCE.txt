@@ -3,5 +3,5 @@ data/sims/robots/ufactory_xarm7_inspire_rh56bfx/ufactory_xarm7_inspire_rh56bfx.u
 commit 1cd410246f7be54c52f79a77e7e8525fa06f55be, written there by scripts/compose-sim-robot.py.
 Changed here: the root prim is xarm7_inspire_rh56bfx, the arm reference
 points at ../../xarm7/usd/ufactory_xarm7.usd, and the hand reference at
-../../inspire_rh56bfx/usd/inspire_rh56bfx_isaaclab.usda (the wrapper with the
+../../../hands/inspire_rh56bfx/usd/inspire_rh56bfx_isaaclab.usda (the wrapper with the
 thumb limit fix and drive gains) instead of the raw sample.

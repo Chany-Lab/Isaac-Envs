@@ -1,7 +1,7 @@
 """UFACTORY xArm7, seven joints, no gripper.
 
 The USD is Isaac Sim 5.1's xArm7 asset with its gripper variant set to None,
-taken from the Mimic repo (see assets/robots/xarm7/SOURCE.txt). It pins its
+taken from the Mimic repo (see assets/robots/manipulation/xarm7/SOURCE.txt). It pins its
 base to the world with its own `root_joint`, so the cfg does not fix it.
 Gains follow ManiSkill's xArm7 agent (stiffness 1e3, damping 1e2,
 haosulab/ManiSkill, Apache-2.0); torque limits are UFACTORY's (50 / 30 / 20
@@ -19,7 +19,14 @@ from isaaclab.assets import ArticulationCfg
 
 from isaac_envs import ASSETS_ROOT
 
-XARM7_USD = ASSETS_ROOT / "robots" / "xarm7" / "usd" / "ufactory_xarm7.usd"
+XARM7_USD = (
+    ASSETS_ROOT
+    / "robots"
+    / "manipulation"
+    / "xarm7"
+    / "usd"
+    / "ufactory_xarm7.usd"
+)
 
 ARM_JOINTS = [f"joint{i}" for i in range(1, 8)]
 FLANGE_LINK = "link7"

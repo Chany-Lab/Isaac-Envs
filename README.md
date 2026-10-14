@@ -138,10 +138,10 @@ uv run python scripts/preview.py G1_CFG --fix-base                   # 휴머노
 ### 에셋 다시 만들기
 
 ```
-uv run python scripts/convert_urdf.py assets/robots/so101/urdf/so101_new_calib.urdf \
-    assets/robots/so101/usd so101.usd
-uv run python scripts/convert_urdf.py assets/robots/g1/urdf/g1_29dof_rev_1_0.urdf \
-    assets/robots/g1/usd g1_29dof.usd --floating-base --collider convex_hull
+uv run python scripts/convert_urdf.py assets/robots/manipulation/so101/urdf/so101_new_calib.urdf \
+    assets/robots/manipulation/so101/usd so101.usd
+uv run python scripts/convert_urdf.py assets/robots/humanoid/g1/urdf/g1_29dof_rev_1_0.urdf \
+    assets/robots/humanoid/g1/usd g1_29dof.usd --floating-base --collider convex_hull
 uv run python scripts/build_props.py         # props/*/dims.py 고친 뒤 소품 USD 재생성
 uv run python scripts/write_drive_gains.py   # 로봇 cfg 게인 고친 뒤, 또는 URDF 재변환 뒤
 ```
@@ -150,18 +150,19 @@ uv run python scripts/write_drive_gains.py   # 로봇 cfg 게인 고친 뒤, 또
 
 ```
 isaac_envs/          cfg (uv sync 로 .venv 에 설치)
-  robots/            로봇 cfg, 파일 하나에 로봇 하나
+  robots/<분류>/     로봇 cfg (manipulation, humanoid, hands), 파일 하나에 로봇 하나
   props/<소품>/       cfg.py 에 cfg, dims.py 에 치수 (빌더와 cfg 가 같이 쓴다)
   scenes/<씬>/       cfg.py 에 씬 cfg
 assets/              실제 파일
-  robots/so101/urdf  공식 SO-ARM100 원본 (SOURCE.txt 에 커밋·라이선스)
-  robots/so101/usd   convert_urdf.py 로 만든 USD
-  robots/g1/urdf     unitree_ros g1_description 원본 (SOURCE.txt)
-  robots/g1/usd      convert_urdf.py 로 만든 USD (자유 베이스, convex hull)
-  robots/xarm7/usd   Mimic 에서 가져온 Isaac Sim 5.1 xArm7 USD (SOURCE.txt)
-  robots/inspire_rh56bfx/usd  Mimic 에서 가져온 Isaac Sim 6.0 Inspire 손 USD
+  robots/manipulation/so101/urdf  공식 SO-ARM100 원본 (SOURCE.txt 에 커밋·라이선스)
+  robots/manipulation/so101/usd   convert_urdf.py 로 만든 USD
+  robots/manipulation/xarm7/usd   Mimic 에서 가져온 Isaac Sim 5.1 xArm7 USD (SOURCE.txt)
+  robots/manipulation/xarm7_inspire_rh56bfx/usd  xArm7 와 Inspire 손을 참조해 붙인
+                     Mimic 합본 USDA
+  robots/humanoid/g1/urdf  unitree_ros g1_description 원본 (SOURCE.txt)
+  robots/humanoid/g1/usd   convert_urdf.py 로 만든 USD (자유 베이스, convex hull)
+  robots/hands/inspire_rh56bfx/usd  Mimic 에서 가져온 Isaac Sim 6.0 Inspire 손 USD
                      + Isaac Lab 용 래퍼 *_isaaclab.usda (SOURCE.txt)
-  robots/xarm7_inspire_rh56bfx/usd  위 둘을 참조해 붙인 Mimic 합본 USDA
   props/table        Isaac Sim 패킹 테이블 원본 + 래퍼 table.usda (SOURCE.txt)
   props/{pan,pen,drawer}/*.usd  build_props.py 로 만든 USD
 scripts/

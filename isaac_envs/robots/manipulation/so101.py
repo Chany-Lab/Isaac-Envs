@@ -15,7 +15,14 @@ from isaaclab.assets import ArticulationCfg
 
 from isaac_envs import ASSETS_ROOT
 
-SO101_USD = ASSETS_ROOT / "robots" / "so101" / "usd" / "so101.usd"
+SO101_USD = (
+    ASSETS_ROOT
+    / "robots"
+    / "manipulation"
+    / "so101"
+    / "usd"
+    / "so101.usd"
+)
 
 ARM_JOINTS = ["shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wrist_roll"]
 GRIPPER_JOINT = "gripper"
