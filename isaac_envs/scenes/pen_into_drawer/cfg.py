@@ -23,9 +23,9 @@ from isaac_envs.robots import SO101_CFG
 H = TABLE_HEIGHT
 WORK_POS = (-TABLE_SIZE[0] / 2 + 0.15, 0.0, H)
 
-# Yaw quaternions, (w, x, y, z).
-YAW_MINUS_90 = (0.7071068, 0.0, 0.0, -0.7071068)
-YAW_180 = (0.0, 0.0, 0.0, 1.0)
+# Yaw quaternions, (x, y, z, w) as in Isaac Lab 3.0.
+YAW_MINUS_90 = (0.0, 0.0, -0.7071068, 0.7071068)
+YAW_180 = (0.0, 0.0, 1.0, 0.0)
 
 
 def on_table(dx: float, dy: float) -> tuple[float, float, float]:

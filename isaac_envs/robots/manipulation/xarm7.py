@@ -16,6 +16,7 @@ import math
 import isaaclab.sim as sim_utils
 from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.assets import ArticulationCfg
+from isaaclab_physx.sim.schemas import PhysxArticulationCfg, PhysxRigidBodyCfg
 
 from isaac_envs import ASSETS_ROOT
 
@@ -36,11 +37,11 @@ XARM7_CFG = ArticulationCfg(
         usd_path=str(XARM7_USD),
         # The xArm controller compensates gravity, and ManiSkill's gains assume
         # it does; like Isaac Lab's Franka cfg, the arm ignores gravity instead.
-        rigid_props=sim_utils.RigidBodyPropertiesCfg(
+        rigid_props=PhysxRigidBodyCfg(
             disable_gravity=True,
             max_depenetration_velocity=5.0,
         ),
-        articulation_props=sim_utils.ArticulationRootPropertiesCfg(
+        articulation_props=PhysxArticulationCfg(
             enabled_self_collisions=False,
             solver_position_iteration_count=8,
             solver_velocity_iteration_count=0,
@@ -64,12 +65,12 @@ XARM7_CFG = ArticulationCfg(
             joint_names_expr=ARM_JOINTS,
             stiffness=1000.0,
             damping=100.0,
-            effort_limit_sim={
+            joint_effort_limit={
                 "joint[1-2]": 50.0,
                 "joint[3-5]": 30.0,
                 "joint[6-7]": 20.0,
             },
-            velocity_limit_sim=3.14,  # 180 deg/s
+            joint_velocity_limit=3.14,  # 180 deg/s
         ),
     },
 )

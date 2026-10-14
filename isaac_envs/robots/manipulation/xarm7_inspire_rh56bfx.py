@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import isaaclab.sim as sim_utils
 from isaaclab.assets import ArticulationCfg
+from isaaclab_physx.sim.schemas import PhysxArticulationCfg, PhysxRigidBodyCfg
 
 from isaac_envs import ASSETS_ROOT
 from isaac_envs.robots.hands.inspire_rh56bfx import HAND_JOINTS, INSPIRE_RH56BFX_CFG
@@ -30,12 +31,12 @@ XARM7_INSPIRE_RH56BFX_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path=str(XARM7_INSPIRE_RH56BFX_USD),
         # Gravity off, as for the xArm7 alone: its controller compensates it.
-        rigid_props=sim_utils.RigidBodyPropertiesCfg(
+        rigid_props=PhysxRigidBodyCfg(
             disable_gravity=True,
             max_depenetration_velocity=1.0,
         ),
         # The hand's small links need the hand's solver iterations.
-        articulation_props=sim_utils.ArticulationRootPropertiesCfg(
+        articulation_props=PhysxArticulationCfg(
             enabled_self_collisions=False,
             solver_position_iteration_count=16,
             solver_velocity_iteration_count=1,

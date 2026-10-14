@@ -21,6 +21,7 @@ from __future__ import annotations
 import isaaclab.sim as sim_utils
 from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.assets import ArticulationCfg
+from isaaclab_physx.sim.schemas import PhysxArticulationCfg, PhysxRigidBodyCfg
 
 from isaac_envs import ASSETS_ROOT
 
@@ -45,22 +46,22 @@ HAND_JOINTS = [
 INSPIRE_RH56BFX_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path=str(INSPIRE_RH56BFX_USD),
-        rigid_props=sim_utils.RigidBodyPropertiesCfg(
+        rigid_props=PhysxRigidBodyCfg(
             disable_gravity=False,
             max_depenetration_velocity=1.0,
         ),
-        articulation_props=sim_utils.ArticulationRootPropertiesCfg(
+        articulation_props=PhysxArticulationCfg(
             enabled_self_collisions=False,
             solver_position_iteration_count=16,
             solver_velocity_iteration_count=1,
-            fix_root_link=True,
         ),
+        fix_root_link=True,
     ),
     init_state=ArticulationCfg.InitialStateCfg(
         joint_pos={".*": 0.0}, joint_vel={".*": 0.0}
     ),
     actuators={
-        # effort_limit_sim=None keeps the USD's 1.4-1.9 N·m.
+        # joint_effort_limit=None keeps the USD's 1.4-1.9 N·m.
         "fingers": ImplicitActuatorCfg(
             joint_names_expr=HAND_JOINTS,
             stiffness=10.0,

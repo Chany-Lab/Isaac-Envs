@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import isaaclab.sim as sim_utils
 from isaaclab.assets import RigidObjectCfg
+from isaaclab_physx.sim.schemas import PhysxRigidBodyCfg
 
 from isaac_envs import ASSETS_ROOT
 
@@ -14,7 +15,7 @@ PEN_CFG = RigidObjectCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path=str(PEN_USD),
         # Light and thin: more solver iterations keep it from jittering.
-        rigid_props=sim_utils.RigidBodyPropertiesCfg(
+        rigid_props=PhysxRigidBodyCfg(
             solver_position_iteration_count=16,
             max_depenetration_velocity=1.0,
         ),

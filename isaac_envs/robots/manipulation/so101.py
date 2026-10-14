@@ -12,6 +12,7 @@ from __future__ import annotations
 import isaaclab.sim as sim_utils
 from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.assets import ArticulationCfg
+from isaaclab_physx.sim.schemas import PhysxArticulationCfg, PhysxRigidBodyCfg
 
 from isaac_envs import ASSETS_ROOT
 
@@ -35,16 +36,16 @@ SO101_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path=str(SO101_USD),
         activate_contact_sensors=False,
-        rigid_props=sim_utils.RigidBodyPropertiesCfg(
+        rigid_props=PhysxRigidBodyCfg(
             disable_gravity=False,
             max_depenetration_velocity=5.0,
         ),
-        articulation_props=sim_utils.ArticulationRootPropertiesCfg(
+        articulation_props=PhysxArticulationCfg(
             enabled_self_collisions=True,
             solver_position_iteration_count=8,
             solver_velocity_iteration_count=0,
-            fix_root_link=True,
         ),
+        fix_root_link=True,
     ),
     init_state=ArticulationCfg.InitialStateCfg(
         # Upright with the wrist folded forward, as in isaac_so_arm101; all
@@ -66,8 +67,8 @@ SO101_CFG = ArticulationCfg(
             damping=0.60,
             armature=0.028,
             friction=0.052,
-            effort_limit_sim=STS3215_STALL_NM,
-            velocity_limit_sim=STS3215_SPEED_RAD_S,
+            joint_effort_limit=STS3215_STALL_NM,
+            joint_velocity_limit=STS3215_SPEED_RAD_S,
         ),
         "gripper": ImplicitActuatorCfg(
             joint_names_expr=[GRIPPER_JOINT],
@@ -75,8 +76,8 @@ SO101_CFG = ArticulationCfg(
             damping=0.60,
             armature=0.028,
             friction=0.052,
-            effort_limit_sim=STS3215_STALL_NM,
-            velocity_limit_sim=STS3215_SPEED_RAD_S,
+            joint_effort_limit=STS3215_STALL_NM,
+            joint_velocity_limit=STS3215_SPEED_RAD_S,
         ),
     },
     soft_joint_pos_limit_factor=1.0,

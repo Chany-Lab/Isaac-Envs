@@ -6,6 +6,7 @@ from __future__ import annotations
 import isaaclab.sim as sim_utils
 from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.assets import ArticulationCfg
+from isaaclab_physx.sim.schemas import PhysxArticulationCfg
 
 from isaac_envs import ASSETS_ROOT
 from isaac_envs.props.drawer.dims import DRAWER_TRAVEL
@@ -16,7 +17,7 @@ DRAWER_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path=str(DRAWER_USD),
         # The USD pins the cabinet with its own root_joint.
-        articulation_props=sim_utils.ArticulationRootPropertiesCfg(
+        articulation_props=PhysxArticulationCfg(
             enabled_self_collisions=False,
         ),
     ),
